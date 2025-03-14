@@ -16,6 +16,7 @@ int Homing3 = 0;
 int HomingStepValue1 = 0;
 int HomingStepValue2 = 0;
 int HomingStepValue3 = 0;
+bool isAllowed = false; //Variable to allow code to continue once RFID is detected
 
 //lcd stuff
 #define I2C_ADDR    0x27
@@ -120,7 +121,7 @@ AccelStepper stepper4(1,7,6);
 
 
      Serial.println("Initialization Complete");     
-     delay(5000);
+     delay(1000);
 
   //RFID Portion
   Serial.begin(9600);   // Initiate a serial communication
@@ -160,14 +161,16 @@ AccelStepper stepper4(1,7,6);
   Serial.println();
   Serial.print("Message : ");
   content.toUpperCase();
-  if (content.substring(1) == "87 E5 BE A7") //change here the UID of the card/cards that you want to give access
+  if (content.substring(1) == "87 E5 BE A7" || "EA FA 9C 82") //change here the UID of the card/cards that you want to give access
   {
+    bool isAllowed = true; 
     Serial.println("Authorized access");
     Serial.println();
     delay(3000);
   }
  
  else   {
+    bool isAllowed = false; 
     Serial.println(" Access denied");
     delay(3000);
   }
