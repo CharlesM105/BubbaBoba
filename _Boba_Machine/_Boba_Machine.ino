@@ -2,9 +2,12 @@
 
 
 //libaries
-#include <MultiStepper.h>
+#include <AccelStepper.h>
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
+//RFID Code Portion
+#include <SPI.h>
+#include <MFRC522.h>
 
 //variables
 int Homing1 = 0;
@@ -19,6 +22,11 @@ int HomingStepValue3 = 0;
 #define LCD_COLUMNS 20
 #define LCD_LINES   4
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
+
+//RFID Code Portion
+#define SS_PIN 10
+#define RST_PIN 9
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
 //rotary encoder stuff
 #define SW 43
@@ -41,7 +49,7 @@ AccelStepper stepper4(1,7,6);
  void setup() { 
 
 //serial monitor stuff
-     Serial.begin (115200);
+     Serial.begin (9600);
      Serial.println("Power On");
 
 
@@ -113,12 +121,56 @@ AccelStepper stepper4(1,7,6);
 
      Serial.println("Initialization Complete");     
      delay(5000);
+
+  //RFID Portion
+  Serial.begin(9600);   // Initiate a serial communication
+  SPI.begin();      // Initiate  SPI bus
+  mfrc522.PCD_Init();   // Initiate MFRC522
+  Serial.println("Approximate your card to the reader...");
+  Serial.println();
 }
 
 
 
 //main code
  void loop() { 
+
+  //RFID Portion
+// Look for new cards
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+  //Show UID on serial monitor
+  Serial.print("UID tag :");
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+     Serial.print(mfrc522.uid.uidByte[i], HEX);
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  Serial.println();
+  Serial.print("Message : ");
+  content.toUpperCase();
+  if (content.substring(1) == "87 E5 BE A7") //change here the UID of the card/cards that you want to give access
+  {
+    Serial.println("Authorized access");
+    Serial.println();
+    delay(3000);
+  }
+ 
+ else   {
+    Serial.println(" Access denied");
+    delay(3000);
+  }
 
 
 //rotary encoder stuff
@@ -248,6 +300,5 @@ Serial.println("Full Homing Sequence Completed");
     lcd.setCursor(0, 1);
     lcd.print(" -HOMING  COMPLETE-");
  }
-
 //write the rest of the stuff here
 }
