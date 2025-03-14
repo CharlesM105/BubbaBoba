@@ -29,6 +29,9 @@ LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 #define RST_PIN 9
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 
+//Led portion
+#define LED_PIN 7
+
 //rotary encoder stuff
 #define SW 43
 #define DT 45
@@ -79,6 +82,7 @@ AccelStepper stepper4(1,7,6);
    pinMode (CLK,INPUT);
    pinMode (DT,INPUT);
    pinMode (SW,INPUT);
+   pinMode (LED_PIN, OUTPUT);
 
 //stepper values reset
    stepper1.setMaxSpeed(1000);
@@ -129,6 +133,9 @@ AccelStepper stepper4(1,7,6);
   mfrc522.PCD_Init();   // Initiate MFRC522
   Serial.println("Approximate your card to the reader...");
   Serial.println();
+
+// LED Stuff
+digitalWrite(LED_PIN, HIGH);  
 }
 
 
