@@ -2,7 +2,7 @@
 
 
 //libaries
-#include <AccelStepper.h>
+#include <MultiStepper.h>
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
 
