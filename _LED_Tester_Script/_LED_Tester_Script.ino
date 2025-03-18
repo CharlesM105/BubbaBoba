@@ -1,29 +1,41 @@
-#include <FastLED.h>
+#include <Adafruit_NeoPixel.h>
 
-#define LED_PIN     6    // Pin connected to the LED strip data input
-#define NUM_LEDS    30   // Number of LEDs in the strip
-#define BRIGHTNESS  150  // Brightness (0-255)
-#define LED_TYPE    WS2812B
-#define COLOR_ORDER GRB
+#define PIN 2	 // input pin Neopixel is attached to
 
-CRGB leds[NUM_LEDS];  // Array to hold LED colors
+#define NUMPIXELS      9// number of neopixels in strip
+
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
+int delayval = 100; // timing delay in milliseconds
+
+int redColor = 0;
+int greenColor = 0;
+int blueColor = 0;
 
 void setup() {
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-    FastLED.setBrightness(BRIGHTNESS);
+  // Initialize the NeoPixel library.
+  pixels.begin();
 }
 
 void loop() {
-    rainbowCycle(10);  // Cycle through rainbow colors
+  setColor();
+
+  for (int i=0; i < NUMPIXELS; i++) {
+    // pixels.Color takes RGB values, from 0,0,0 up to 255,255,255
+    pixels.setPixelColor(i, pixels.Color(redColor, greenColor, blueColor));
+
+    // This sends the updated pixel color to the hardware.
+    pixels.show();
+
+    // Delay for a period of time (in milliseconds).
+    delay(delayval);
+  }
 }
 
-// Function to cycle through rainbow colors
-void rainbowCycle(int wait) {
-    for (int j = 0; j < 255; j++) {
-        for (int i = 0; i < NUM_LEDS; i++) {
-            leds[i] = CHSV((i * 256 / NUM_LEDS + j) & 255, 255, BRIGHTNESS);
-        }
-        FastLED.show();
-        delay(wait);
-    }
+// setColor()
+// picks random values to set for RGB
+void setColor(){
+  redColor = random(0, 255);
+  greenColor = random(0,255);
+  blueColor = random(0, 255);
 }
