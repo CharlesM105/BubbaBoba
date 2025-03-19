@@ -1,7 +1,7 @@
 /*
  * Created by ArduinoGetStarted.com
  *
- * Modified to include a Rotary Encoder by ChatGPT
+ * Modified to include a Rotary Encoder with a separate clear button by ChatGPT
  *
  * This example code is in the public domain
  *
@@ -12,13 +12,15 @@
 
 #define ENCODER_CLK 2   // Rotary Encoder CLK pin
 #define ENCODER_DT 3    // Rotary Encoder DT pin
-#define ENCODER_SW 4    // Rotary Encoder push button
+#define ENCODER_SW 4    // Rotary Encoder push button (not used for clearing)
+#define CLEAR_PIN 5     // Separate button for clearing the counter
 
 LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 columns, 4 rows
 
 volatile int counter = 0;  // Counter variable
 int lastStateCLK;          // Previous state of CLK pin
 bool buttonPressed = false; // State of encoder button
+bool clearButtonPressed = false; // State of clear button
 
 void setup() {
   lcd.init(); // Initialize the LCD
@@ -31,6 +33,7 @@ void setup() {
   pinMode(ENCODER_CLK, INPUT);
   pinMode(ENCODER_DT, INPUT);
   pinMode(ENCODER_SW, INPUT_PULLUP);
+  pinMode(CLEAR_PIN, INPUT_PULLUP); // Set clear button pin
 
   lastStateCLK = digitalRead(ENCODER_CLK); // Read initial state
 
@@ -59,17 +62,17 @@ void loop() {
   
   lastStateCLK = currentStateCLK; // Save last state
 
-  // Check if the button is pressed
-  if (digitalRead(ENCODER_SW) == LOW) {
-    if (!buttonPressed) {
+  // Check if the clear button is pressed
+  if (digitalRead(CLEAR_PIN) == LOW) {
+    if (!clearButtonPressed) {
       counter = 0; // Reset counter
       lcd.setCursor(9, 2);
       lcd.print("     "); // Clear previous value
       lcd.setCursor(9, 2);
       lcd.print(counter);
-      buttonPressed = true;
+      clearButtonPressed = true;
     }
   } else {
-    buttonPressed = false;
+    clearButtonPressed = false;
   }
 }
