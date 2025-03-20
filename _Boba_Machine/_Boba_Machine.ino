@@ -1,4 +1,4 @@
-// Yummy Boba + Menu System Integration + NeoPixel LED Control
+// Yummy Boba + Menu System Integration + NeoPixel LED Control with Scrolling Menu
 
 // Libraries
 #include <AccelStepper.h>
@@ -31,7 +31,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 volatile int menuIndex = 0;  
 int lastStateCLK;  
 bool buttonPressed = false;  
-int menuStartIndex = 0;  
+int menuStartIndex = 0;  // Start index for scrolling
 
 // Stepper Motors
 AccelStepper stepper1(1, 13, 12);
@@ -53,9 +53,6 @@ int greenColor = 0;
 int blueColor = 0;
 
 // Homing Variables
-int Homing1 = 1;
-int Homing2 = 1;
-int Homing3 = 1;
 bool isAllowed = false;
 
 // Menu Items
@@ -145,15 +142,23 @@ void handleRotaryEncoder() {
       menuIndex--;
     }
 
+    // Wrap-around logic
     if (menuIndex >= menuSize) menuIndex = 0;
     if (menuIndex < 0) menuIndex = menuSize - 1;
+
+    // Scrolling logic
+    if (menuIndex >= menuStartIndex + 3) {
+      menuStartIndex++;
+    } else if (menuIndex < menuStartIndex) {
+      menuStartIndex--;
+    }
 
     updateMenuDisplay();
   }
   lastStateCLK = currentStateCLK;
 }
 
-// Function to update the menu display
+// Function to update the menu display with scrolling
 void updateMenuDisplay() {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -201,12 +206,6 @@ void startProcess() {
   lcd.clear();
   lcd.print("Starting Process...");
   Serial.println("Starting Process...");
-
-  Homing1 = 1;
-  Homing2 = 1;
-  Homing3 = 1;
-  Serial.println("Full Homing Sequence Initiated");
-
   lcd.clear();
   lcd.print("Homing Complete!");
   Serial.println("Homing Complete!");
