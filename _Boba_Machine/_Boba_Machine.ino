@@ -1,4 +1,4 @@
-// Yummy Boba + Menu System Integration
+// Yummy Boba + Menu System Integration + NeoPixel LED Control
 
 // Libraries
 #include <AccelStepper.h>
@@ -6,6 +6,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Adafruit_NeoPixel.h>
 
 // LCD Display
 #define I2C_ADDR 0x27
@@ -41,13 +42,20 @@ AccelStepper stepper4(1, 7, 6);
 // Servo
 Servo servo_A0;
 
+// NeoPixel LED Strip
+#define LED_STRIP_PIN 30
+#define NUMPIXELS 200
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+
+int delayval = 100;
+int redColor = 0;
+int greenColor = 0;
+int blueColor = 0;
+
 // Homing Variables
 int Homing1 = 1;
 int Homing2 = 1;
 int Homing3 = 1;
-int HomingStepValue1 = 0;
-int HomingStepValue2 = 0;
-int HomingStepValue3 = 0;
 bool isAllowed = false;
 
 // Menu Items
@@ -56,6 +64,7 @@ String menuItems[] = {
   "Check RFID",
   "Servo Control",
   "Stepper Control",
+  "LED Control",
   "Exit"
 };
 int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
@@ -101,6 +110,11 @@ void setup() {
   servo_A0.attach(A0, 500, 2500);
   servo_A0.write(0);
   Serial.println("Servo Reset");
+
+  // NeoPixel LED Setup
+  pixels.begin();
+  pixels.clear();
+  pixels.show();
 
   // Display Initial Menu
   updateMenuDisplay();
@@ -176,6 +190,8 @@ void selectMenuItem() {
     servoControl();
   } else if (menuIndex == 3) {
     stepperControl();
+  } else if (menuIndex == 4) {
+    ledControl();
   }
   updateMenuDisplay();
 }
@@ -186,13 +202,11 @@ void startProcess() {
   lcd.print("Starting Process...");
   Serial.println("Starting Process...");
 
-  // Homing Sequence
   Homing1 = 1;
   Homing2 = 1;
   Homing3 = 1;
   Serial.println("Full Homing Sequence Initiated");
 
-  // Display complete message
   lcd.clear();
   lcd.print("Homing Complete!");
   Serial.println("Homing Complete!");
@@ -261,5 +275,25 @@ void stepperControl() {
 
   lcd.print("Stepper Reset!");
   Serial.println("Stepper Reset!");
+  delay(1000);
+}
+
+// Function to control NeoPixel LEDs
+void ledControl() {
+  lcd.clear();
+  lcd.print("LED Changing...");
+  Serial.println("LED Changing...");
+
+  redColor = random(0, 255);
+  greenColor = random(0, 255);
+  blueColor = random(0, 255);
+
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(redColor, greenColor, blueColor));
+    pixels.show();
+    delay(delayval);
+  }
+
+  lcd.print("LED Updated!");
   delay(1000);
 }
