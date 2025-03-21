@@ -51,6 +51,7 @@ int delayval = 100;
 int redColor = 0;
 int greenColor = 0;
 int blueColor = 0;
+int currentBrightness = 51;  // 20% of 255
 
 // Homing Variables
 bool isAllowed = false;
@@ -110,7 +111,14 @@ void setup() {
 
   // NeoPixel LED Setup
   pixels.begin();
+  pixels.setBrightness(currentBrightness);  // Set initial brightness to 20%
   pixels.clear();
+  pixels.show();
+
+  // Turn on default LED color (white)
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(255, 255, 255));
+  }
   pixels.show();
 
   // Display Initial Menu
@@ -132,7 +140,6 @@ void loop() {
   }
 }
 
-// Function to handle rotary encoder
 void handleRotaryEncoder() {
   int currentStateCLK = digitalRead(ENCODER_CLK);
   if (currentStateCLK != lastStateCLK) {
@@ -158,7 +165,6 @@ void handleRotaryEncoder() {
   lastStateCLK = currentStateCLK;
 }
 
-// Function to update the menu display with scrolling
 void updateMenuDisplay() {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -169,16 +175,15 @@ void updateMenuDisplay() {
     if (itemIndex < menuSize) {
       lcd.setCursor(1, i + 1);
       if (itemIndex == menuIndex) {
-        lcd.print("> "); 
+        lcd.print("> ");
       } else {
-        lcd.print("  "); 
+        lcd.print("  ");
       }
       lcd.print(menuItems[itemIndex]);
     }
   }
 }
 
-// Function to execute selected menu item
 void selectMenuItem() {
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -201,7 +206,6 @@ void selectMenuItem() {
   updateMenuDisplay();
 }
 
-// Function to start homing process
 void startProcess() {
   lcd.clear();
   lcd.print("Starting Process...");
@@ -212,7 +216,6 @@ void startProcess() {
   delay(2000);
 }
 
-// Function to check RFID
 void checkRFID() {
   lcd.clear();
   lcd.print("Scan RFID Now...");
@@ -229,21 +232,48 @@ void checkRFID() {
 
     content.toUpperCase();
     lcd.clear();
+
     if (content == "87E5BEA7" || content == "EAFA9C82") {
       lcd.print("Access Granted!");
       Serial.println("Access Granted");
       isAllowed = true;
+      flashColor(0, 255, 0); // green
     } else {
       lcd.print("Access Denied!");
       Serial.println("Access Denied");
       isAllowed = false;
+      flashColor(255, 0, 0); // red
     }
+
     delay(2000);
+
+    // Return to white
+    for (int i = 0; i < NUMPIXELS; i++) {
+      pixels.setPixelColor(i, pixels.Color(255, 255, 255));
+    }
+    pixels.show();
+
     break;
   }
 }
 
-// Function to control servo
+void flashColor(uint8_t r, uint8_t g, uint8_t b) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < NUMPIXELS; j++) {
+      pixels.setPixelColor(j, pixels.Color(r, g, b));
+    }
+    pixels.show();
+    delay(300);
+
+    // Off
+    for (int j = 0; j < NUMPIXELS; j++) {
+      pixels.setPixelColor(j, 0);
+    }
+    pixels.show();
+    delay(300);
+  }
+}
+
 void servoControl() {
   lcd.clear();
   lcd.print("Moving Servo...");
@@ -256,62 +286,152 @@ void servoControl() {
   delay(1000);
 }
 
-// Function to control stepper motors
 void stepperControl() {
   lcd.clear();
   lcd.print("Stepper Test...");
   Serial.println("Stepper Test...");
 
   stepper1.moveTo(500);
-  while (stepper1.distanceToGo() != 0) {
-    stepper1.run();
-  }
+  while (stepper1.distanceToGo() != 0) stepper1.run();
   delay(500);
   stepper1.moveTo(0);
-  while (stepper1.distanceToGo() != 0) {
-    stepper1.run();
-  }
+  while (stepper1.distanceToGo() != 0) stepper1.run();
+
   stepper2.moveTo(500);
-  while (stepper2.distanceToGo() != 0) {
-    stepper2.run();
-  }
+  while (stepper2.distanceToGo() != 0) stepper2.run();
   delay(500);
   stepper2.moveTo(0);
-  while (stepper2.distanceToGo() != 0) {
-    stepper2.run();
-  }
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+
   stepper3.moveTo(500);
-  while (stepper3.distanceToGo() != 0) {
-    stepper3.run();
-  }
+  while (stepper3.distanceToGo() != 0) stepper3.run();
   delay(500);
   stepper3.moveTo(0);
-  while (stepper3.distanceToGo() != 0) {
-    stepper3.run();
-  }
+  while (stepper3.distanceToGo() != 0) stepper3.run();
 
-  
   lcd.print("All Steppers Reset!");
   Serial.println("Steppers Reset!");
   delay(1000);
 }
 
-// Function to control NeoPixel LEDs
 void ledControl() {
-  lcd.clear();
-  lcd.print("LED Changing...");
-  Serial.println("LED Changing...");
+  int subMenuIndex = 0;
+  bool selected = false;
 
+  while (!selected) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("LED Menu:");
+    lcd.setCursor(1, 1);
+    lcd.print(subMenuIndex == 0 ? "> Brightness" : "  Brightness");
+    lcd.setCursor(1, 2);
+    lcd.print(subMenuIndex == 1 ? "> Color" : "  Color");
+
+    // Wait for encoder movement or button press
+    int currentStateCLK = digitalRead(ENCODER_CLK);
+    if (currentStateCLK != lastStateCLK) {
+      if (digitalRead(ENCODER_DT) != currentStateCLK) {
+        subMenuIndex++;
+      } else {
+        subMenuIndex--;
+      }
+
+      if (subMenuIndex > 1) subMenuIndex = 0;
+      if (subMenuIndex < 0) subMenuIndex = 1;
+    }
+    lastStateCLK = currentStateCLK;
+
+    if (digitalRead(ENCODER_SW) == LOW) {
+      delay(200); // debounce
+      selected = true;
+    }
+  }
+
+  if (subMenuIndex == 0) {
+    adjustBrightness();
+  } else if (subMenuIndex == 1) {
+    changeColor();
+  }
+}
+
+void adjustBrightness() {
+  bool adjusting = true;
+  int brightnessValue = currentBrightness;
+  int brightnessBarLength;
+  lastStateCLK = digitalRead(ENCODER_CLK); // reset encoder state
+
+  while (adjusting) {
+    // Read encoder
+    int currentStateCLK = digitalRead(ENCODER_CLK);
+    if (currentStateCLK != lastStateCLK) {
+      if (digitalRead(ENCODER_DT) != currentStateCLK) {
+        brightnessValue += 5;
+      } else {
+        brightnessValue -= 5;
+      }
+
+      if (brightnessValue > 255) brightnessValue = 255;
+      if (brightnessValue < 0) brightnessValue = 0;
+
+      currentBrightness = brightnessValue;
+      pixels.setBrightness(currentBrightness);
+      pixels.show(); // Apply brightness
+
+      // Update display
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Adjust Brightness");
+      lcd.setCursor(0, 1);
+      lcd.print("Value: ");
+      lcd.print(currentBrightness);
+
+      brightnessBarLength = map(currentBrightness, 0, 255, 0, 20);
+      lcd.setCursor(0, 2);
+      for (int i = 0; i < brightnessBarLength; i++) {
+        lcd.write(255);  // Full block character
+      }
+      for (int i = brightnessBarLength; i < 20; i++) {
+        lcd.print(" ");  // Fill the rest with blanks
+      }
+    }
+
+    lastStateCLK = currentStateCLK;
+
+    if (digitalRead(ENCODER_SW) == LOW) {
+      delay(300);  // debounce
+      adjusting = false;
+    }
+  }
+
+  // Save brightness and return
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(redColor, greenColor, blueColor));
+  }
+  pixels.setBrightness(currentBrightness);
+  pixels.show();
+}
+
+void changeColor() {
   redColor = random(0, 255);
   greenColor = random(0, 255);
   blueColor = random(0, 255);
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Changing Color...");
+  lcd.setCursor(0, 1);
+  lcd.print("R:");
+  lcd.print(redColor);
+  lcd.print(" G:");
+  lcd.print(greenColor);
+  lcd.print(" B:");
+  lcd.print(blueColor);
+
   for (int i = 0; i < NUMPIXELS; i++) {
     pixels.setPixelColor(i, pixels.Color(redColor, greenColor, blueColor));
-    pixels.show();
-    delay(delayval);
   }
+  pixels.setBrightness(currentBrightness);
+  pixels.show();
 
-  lcd.print("LED Updated!");
-  delay(1000);
+  delay(1500);
 }
