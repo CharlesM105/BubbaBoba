@@ -271,9 +271,28 @@ void stepperControl() {
   while (stepper1.distanceToGo() != 0) {
     stepper1.run();
   }
+  stepper2.moveTo(500);
+  while (stepper2.distanceToGo() != 0) {
+    stepper2.run();
+  }
+  delay(500);
+  stepper2.moveTo(0);
+  while (stepper2.distanceToGo() != 0) {
+    stepper2.run();
+  }
+  stepper3.moveTo(500);
+  while (stepper3.distanceToGo() != 0) {
+    stepper3.run();
+  }
+  delay(500);
+  stepper3.moveTo(0);
+  while (stepper3.distanceToGo() != 0) {
+    stepper3.run();
+  }
 
-  lcd.print("Stepper Reset!");
-  Serial.println("Stepper Reset!");
+  
+  lcd.print("All Steppers Reset!");
+  Serial.println("Steppers Reset!");
   delay(1000);
 }
 
