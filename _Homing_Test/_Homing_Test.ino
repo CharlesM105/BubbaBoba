@@ -1,118 +1,79 @@
-// Libraries
-#include <AccelStepper.h>
+// X Axis
+#define X_STEP_PIN 2
+#define X_DIR_PIN 5
+#define X_LIMIT_PIN 9
 
-// Variables
-int Homing1 = 0;
-int Homing2 = 0;
-int Homing3 = 0;
-int HomingStepValue1 = 0;
-int HomingStepValue2 = 0;
-int HomingStepValue3 = 0;
+// Y Axis
+#define Y_STEP_PIN 3
+#define Y_DIR_PIN 6
+#define Y_LIMIT_PIN 10
 
-const int LIMIT_THRESHOLD = 500;  // Analog trigger threshold
+// Z Axis
+#define Z_STEP_PIN 4
+#define Z_DIR_PIN 7
+#define Z_LIMIT_PIN 11
 
-AccelStepper stepper1(1, 13, 12);
-AccelStepper stepper2(1, 11, 10);
-AccelStepper stepper3(1, 9, 8);
-AccelStepper stepper4(1, 7, 6);
+#define STEP_DELAY 500  // microseconds (controls speed)
+#define BACKOFF_STEPS 100
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("Power On");
+  // Setup stepper pins
+  pinMode(X_STEP_PIN, OUTPUT);
+  pinMode(X_DIR_PIN, OUTPUT);
+  pinMode(Y_STEP_PIN, OUTPUT);
+  pinMode(Y_DIR_PIN, OUTPUT);
+  pinMode(Z_STEP_PIN, OUTPUT);
+  pinMode(Z_DIR_PIN, OUTPUT);
 
-  Homing1 = 1;
-  Homing2 = 1;
-  Homing3 = 1;
-  HomingStepValue1 = 0;
-  HomingStepValue2 = 0;
-  HomingStepValue3 = 0;
+  // Setup limit switch pins (normally open, pulled HIGH)
+  pinMode(X_LIMIT_PIN, INPUT_PULLUP);
+  pinMode(Y_LIMIT_PIN, INPUT_PULLUP);
+  pinMode(Z_LIMIT_PIN, INPUT_PULLUP);
 
-  pinMode(A7, INPUT);  // Stepper 1 analog switch
-  pinMode(4, INPUT);   // Stepper 2 analog switch
-  pinMode(5, INPUT);   // Stepper 3 analog switch
+  Serial.begin(9600);
+  delay(1000);  // Give some time on power-up
 
-  stepper1.setMaxSpeed(1000);
-  stepper2.setMaxSpeed(1000);
-  stepper3.setMaxSpeed(1000);
-  stepper4.setMaxSpeed(1000);
-
-  stepper1.setAcceleration(1000);
-  stepper2.setAcceleration(1000);
-  stepper3.setAcceleration(1000);
-  stepper4.setAcceleration(1000);
-
-  stepper1.setCurrentPosition(0);
-  stepper2.setCurrentPosition(0);
-  stepper3.setCurrentPosition(0);
-  stepper4.setCurrentPosition(0);
+  homeAxis("X", X_STEP_PIN, X_DIR_PIN, X_LIMIT_PIN, false);
+  homeAxis("Y", Y_STEP_PIN, Y_DIR_PIN, Y_LIMIT_PIN, false);
+  homeAxis("Z", Z_STEP_PIN, Z_DIR_PIN, Z_LIMIT_PIN, true); // Z often homes upward
 }
 
 void loop() {
-  // Full homing sequence
-  if (Homing1 || Homing2 || Homing3) {
-    
-    // Homing stepper 1
-    if (Homing1) {
-      stepper1.setMaxSpeed(100.0);
-      stepper1.setAcceleration(100.0);
-      Serial.println("Stepper 1 is Homing");
+  // Nothing here, everything runs once in setup()
+}
 
-      HomingStepValue1 = 1;
+// General homing function
+void homeAxis(const char* axisName, int stepPin, int dirPin, int limitPin, bool reverseDir) {
+  Serial.print("Homing ");
+  Serial.print(axisName);
+  Serial.println(" axis...");
 
-      while (analogRead(A7) < LIMIT_THRESHOLD) {
-        stepper1.moveTo(HomingStepValue1++);
-        stepper1.run();
-        delay(5);
-      }
-
-      stepper1.setCurrentPosition(0);
-      Serial.println("Homing Switch 1 Hit");
-      Serial.println("Homing 1 Completed");
-      Homing1 = 0;
-    }
-
-    // Homing stepper 2
-    if (Homing2) {
-      stepper2.setMaxSpeed(100.0);
-      stepper2.setAcceleration(100.0);
-      Serial.println("Stepper 2 is Homing");
-
-      HomingStepValue2 = 1;
-
-      while (analogRead(4) < LIMIT_THRESHOLD) {
-        stepper2.moveTo(HomingStepValue2++);
-        stepper2.run();
-        delay(5);
-      }
-
-      stepper2.setCurrentPosition(0);
-      Serial.println("Homing Switch 2 Hit");
-      Serial.println("Homing 2 Completed");
-      Homing2 = 0;
-    }
-
-    // Homing stepper 3
-    if (Homing3) {
-      stepper3.setMaxSpeed(100.0);
-      stepper3.setAcceleration(100.0);
-      Serial.println("Stepper 3 is Homing");
-
-      HomingStepValue3 = 1;
-
-      while (analogRead(5) < LIMIT_THRESHOLD) {
-        stepper3.moveTo(HomingStepValue3++);
-        stepper3.run();
-        delay(5);
-      }
-
-      stepper3.setCurrentPosition(0);
-      Serial.println("Homing Switch 3 Hit");
-      Serial.println("Homing 3 Completed");
-      Homing3 = 0;
-    }
-
-    if (!Homing1 && !Homing2 && !Homing3) {
-      Serial.println("Full Homing Sequence Completed");
-    }
+  // Move toward switch
+  digitalWrite(dirPin, reverseDir ? LOW : HIGH);
+  while (digitalRead(limitPin) == HIGH) {
+    singleStep(stepPin, STEP_DELAY);
   }
+
+  // Back off slightly
+  digitalWrite(dirPin, reverseDir ? HIGH : LOW);
+  for (int i = 0; i < BACKOFF_STEPS; i++) {
+    singleStep(stepPin, STEP_DELAY);
+  }
+
+  // Slow approach
+  digitalWrite(dirPin, reverseDir ? LOW : HIGH);
+  while (digitalRead(limitPin) == HIGH) {
+    singleStep(stepPin, STEP_DELAY * 2);  // slower speed
+  }
+
+  Serial.print(axisName);
+  Serial.println(" axis homed.");
+}
+
+// Single step pulse
+void singleStep(int stepPin, int delayMicros) {
+  digitalWrite(stepPin, HIGH);
+  delayMicroseconds(delayMicros);
+  digitalWrite(stepPin, LOW);
+  delayMicroseconds(delayMicros);
 }
