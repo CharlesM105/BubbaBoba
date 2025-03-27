@@ -1,79 +1,168 @@
-// X Axis
-#define X_STEP_PIN 2
-#define X_DIR_PIN 5
-#define X_LIMIT_PIN 9
+//Homing Code :)
 
-// Y Axis
-#define Y_STEP_PIN 3
-#define Y_DIR_PIN 6
-#define Y_LIMIT_PIN 10
+//libaries
+#include <AccelStepper.h>
 
-// Z Axis
-#define Z_STEP_PIN 4
-#define Z_DIR_PIN 7
-#define Z_LIMIT_PIN 11
+//variables
+int Homing1 = 0;
+int Homing2 = 0;
+int Homing3 = 0;
+int HomingStepValue1 = 0;
+int HomingStepValue2 = 0;
+int HomingStepValue3 = 0;
 
-#define STEP_DELAY 500  // microseconds (controls speed)
-#define BACKOFF_STEPS 100
+//stepper stuff
+AccelStepper stepper1(1,13,12);
+AccelStepper stepper2(1,11,10);
+AccelStepper stepper3(1,9,8);
 
-void setup() {
-  // Setup stepper pins
-  pinMode(X_STEP_PIN, OUTPUT);
-  pinMode(X_DIR_PIN, OUTPUT);
-  pinMode(Y_STEP_PIN, OUTPUT);
-  pinMode(Y_DIR_PIN, OUTPUT);
-  pinMode(Z_STEP_PIN, OUTPUT);
-  pinMode(Z_DIR_PIN, OUTPUT);
+//start up code
 
-  // Setup limit switch pins (normally open, pulled HIGH)
-  pinMode(X_LIMIT_PIN, INPUT_PULLUP);
-  pinMode(Y_LIMIT_PIN, INPUT_PULLUP);
-  pinMode(Z_LIMIT_PIN, INPUT_PULLUP);
+ void setup() { 
 
-  Serial.begin(9600);
-  delay(1000);  // Give some time on power-up
+//serial monitor stuff
+     Serial.begin (115200);
+     Serial.println("Power On");
 
-  homeAxis("X", X_STEP_PIN, X_DIR_PIN, X_LIMIT_PIN, false);
-  homeAxis("Y", Y_STEP_PIN, Y_DIR_PIN, Y_LIMIT_PIN, false);
-  homeAxis("Z", Z_STEP_PIN, Z_DIR_PIN, Z_LIMIT_PIN, true); // Z often homes upward
-}
+//variable stuff
+      Homing1 = 1;
+      Homing2 = 1;
+      Homing3 = 1;
+      HomingStepValue1 = 0;
+      HomingStepValue2 = 0;
+      HomingStepValue3 = 0;
 
-void loop() {
-  // Nothing here, everything runs once in setup()
-}
+//pin modes
+   pinMode (4,INPUT);
+   pinMode (3,INPUT);
+   pinMode (2,INPUT);
 
-// General homing function
-void homeAxis(const char* axisName, int stepPin, int dirPin, int limitPin, bool reverseDir) {
-  Serial.print("Homing ");
-  Serial.print(axisName);
-  Serial.println(" axis...");
+//stepper values reset
+   stepper1.setMaxSpeed(3000);
+   stepper2.setMaxSpeed(3000);
+   stepper3.setMaxSpeed(3000);
 
-  // Move toward switch
-  digitalWrite(dirPin, reverseDir ? LOW : HIGH);
-  while (digitalRead(limitPin) == HIGH) {
-    singleStep(stepPin, STEP_DELAY);
+   stepper1.setAcceleration(1000);
+   stepper2.setAcceleration(1000);
+   stepper3.setAcceleration(1000);
+
+   stepper1.setCurrentPosition(0);
+   stepper2.setCurrentPosition(0);
+   stepper3.setCurrentPosition(0);
+
+//initial button check
+   if(digitalRead(2) == HIGH){
+      Serial.println("Warning: Button 1 Pressed Early");
+   }
+      if(digitalRead(3) == HIGH){
+      Serial.println("Warning: Button 2 Pressed Early");
+   }
+      if(digitalRead(4) == HIGH){
+      Serial.println("Warning: Button 3 Pressed Early");
+   }
+ }
+
+//main code
+ void loop() { 
+
+//full homing sequence
+if (Homing1 != 0 && (Homing2 != 0 && Homing3 != 0)) {
+
+//homing stepper 1
+     if (Homing1 != 0){
+
+  stepper1.setMaxSpeed(5000.0);  
+  stepper1.setAcceleration(1000.0); 
+
+   Serial.println("Stepper 1 is Homing");
+
+   HomingStepValue1 = 1;
+
+  while(digitalRead(2) != HIGH){  
+    stepper1.moveTo(HomingStepValue1);  
+    HomingStepValue1++;  
+    stepper1.run(); 
+    delay(5);
   }
 
-  // Back off slightly
-  digitalWrite(dirPin, reverseDir ? HIGH : LOW);
-  for (int i = 0; i < BACKOFF_STEPS; i++) {
-    singleStep(stepPin, STEP_DELAY);
+  stepper1.setCurrentPosition(0);  
+
+  stepper1.setMaxSpeed(5000.0);      
+  stepper1.setAcceleration(1000.0); 
+
+  HomingStepValue1 = -1;
+   Serial.println("Homing Switch 1 Hit");
+
+  stepper1.setCurrentPosition(0);
+  Serial.println("Homing 1 Completed");
+  
+     Homing1 = 0;
+ }
+
+
+//homing stepper 2
+      if (Homing2 != 0){
+
+  stepper2.setMaxSpeed(5000.0);  
+  stepper2.setAcceleration(1000.0); 
+
+   Serial.println("Stepper 2 is Homing");
+
+   HomingStepValue2 = 1;
+
+  while(digitalRead(3) != HIGH){  
+    stepper2.moveTo(HomingStepValue2);  
+    HomingStepValue2--;  
+    stepper2.run(); 
+    delay(5);
   }
 
-  // Slow approach
-  digitalWrite(dirPin, reverseDir ? LOW : HIGH);
-  while (digitalRead(limitPin) == HIGH) {
-    singleStep(stepPin, STEP_DELAY * 2);  // slower speed
+  stepper2.setCurrentPosition(0);  
+
+  stepper2.setMaxSpeed(5000.0);      
+  stepper2.setAcceleration(1000.0); 
+
+  HomingStepValue2 = -1;
+   Serial.println("Homing Switch 2 Hit");
+
+  stepper2.setCurrentPosition(0);
+  Serial.println("Homing 2 Completed");
+  
+     Homing2 = 0;
+ }
+
+
+//homing stepper 3
+      if (Homing3 != 0){
+
+  stepper3.setMaxSpeed(5000.0);  
+  stepper3.setAcceleration(1000.0); 
+
+   Serial.println("Stepper 3 is Homing");
+
+   HomingStepValue3 = -1;
+
+  while(digitalRead(4) != HIGH){  
+    stepper3.moveTo(HomingStepValue3);  
+    HomingStepValue3--;  
+    stepper3.run(); 
+    delay(5);
   }
 
-  Serial.print(axisName);
-  Serial.println(" axis homed.");
-}
+  stepper3.setCurrentPosition(0);  
 
-// Single step pulse
-void singleStep(int stepPin, int delayMicros) {
-  digitalWrite(stepPin, HIGH);
-  delayMicroseconds(delayMicros);
-  digitalWrite(stepPin, LOW);
-  delayMicroseconds(delayMicros);
+  stepper3.setMaxSpeed(5000.0);      
+  stepper3.setAcceleration(1000.0); 
+
+  HomingStepValue3 = +1;
+   Serial.println("Homing Switch 3 Hit");
+   
+  stepper3.setCurrentPosition(0);
+  Serial.println("Homing 3 Completed");
+  
+     Homing3 = 0;
+  }
+
+Serial.println("Full Homing Sequence Completed"); 
+ }
 }
