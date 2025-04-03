@@ -71,7 +71,7 @@ int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
 void setup() {
   Serial.begin(9600);
   lcd.init(); lcd.backlight();
-  lcd.setCursor(3, 1); lcd.print("YUMMY BOBA BOOT");
+  lcd.setCursor(3, 1); lcd.print("YUMMY BOBA BOT");
   delay(1500);
 
   for (int i = 1; i <= 4; i++) {

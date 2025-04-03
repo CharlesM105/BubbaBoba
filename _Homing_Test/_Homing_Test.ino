@@ -13,8 +13,9 @@ int HomingStepValue3 = 0;
 
 //stepper stuff
 AccelStepper stepper1(1,13,12);
-AccelStepper stepper2(1,11,10);
-AccelStepper stepper3(1,9,8);
+AccelStepper stepper2(1,9,8);
+AccelStepper stepper3(1,11,10);
+AccelStepper stepper4(1,7,6);
 
 //start up code
 
@@ -41,14 +42,17 @@ AccelStepper stepper3(1,9,8);
    stepper1.setMaxSpeed(3000);
    stepper2.setMaxSpeed(3000);
    stepper3.setMaxSpeed(3000);
+   stepper4.setMaxSpeed(3000);
 
    stepper1.setAcceleration(1000);
    stepper2.setAcceleration(1000);
    stepper3.setAcceleration(1000);
+   stepper4.setAcceleration(1000);
 
    stepper1.setCurrentPosition(0);
    stepper2.setCurrentPosition(0);
    stepper3.setCurrentPosition(0);
+   stepper4.setCurrentPosition(0);
 
 //initial button check
    if(digitalRead(2) == HIGH){
@@ -78,7 +82,7 @@ if (Homing1 != 0 && (Homing2 != 0 && Homing3 != 0)) {
 
    HomingStepValue1 = 1;
 
-  while(digitalRead(2) != HIGH){  
+  while(digitalRead(4) != HIGH){  
     stepper1.moveTo(HomingStepValue1);  
     HomingStepValue1++;  
     stepper1.run(); 
@@ -103,29 +107,29 @@ if (Homing1 != 0 && (Homing2 != 0 && Homing3 != 0)) {
 //homing stepper 2
       if (Homing2 != 0){
 
-  stepper2.setMaxSpeed(5000.0);  
-  stepper2.setAcceleration(1000.0); 
+  stepper4.setMaxSpeed(5000.0);  
+  stepper4.setAcceleration(1000.0); 
 
    Serial.println("Stepper 2 is Homing");
 
    HomingStepValue2 = 1;
 
-  while(digitalRead(3) != HIGH){  
-    stepper2.moveTo(HomingStepValue2);  
+  while(digitalRead(2) != HIGH){  
+    stepper4.moveTo(HomingStepValue2);  
     HomingStepValue2--;  
-    stepper2.run(); 
+    stepper4.run(); 
     delay(5);
   }
 
-  stepper2.setCurrentPosition(0);  
+  stepper4.setCurrentPosition(0);  
 
-  stepper2.setMaxSpeed(5000.0);      
-  stepper2.setAcceleration(1000.0); 
+  stepper4.setMaxSpeed(5000.0);      
+  stepper4.setAcceleration(1000.0); 
 
   HomingStepValue2 = -1;
    Serial.println("Homing Switch 2 Hit");
 
-  stepper2.setCurrentPosition(0);
+  stepper4.setCurrentPosition(0);
   Serial.println("Homing 2 Completed");
   
      Homing2 = 0;
@@ -142,7 +146,7 @@ if (Homing1 != 0 && (Homing2 != 0 && Homing3 != 0)) {
 
    HomingStepValue3 = -1;
 
-  while(digitalRead(4) != HIGH){  
+  while(digitalRead(3) != HIGH){  
     stepper3.moveTo(HomingStepValue3);  
     HomingStepValue3--;  
     stepper3.run(); 
