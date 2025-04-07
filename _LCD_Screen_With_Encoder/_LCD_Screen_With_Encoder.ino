@@ -1,118 +1,253 @@
 #include <LiquidCrystal_I2C.h>
 
-#define ENCODER_CLK 2   // Rotary Encoder CLK pin
-#define ENCODER_DT 3    // Rotary Encoder DT pin
-#define ENCODER_SW 4    // Rotary Encoder push button (for selection)
+// LCD Setup
+#define I2C_ADDR 0x27
+#define LCD_COLUMNS 20
+#define LCD_LINES 4
+LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
-LiquidCrystal_I2C lcd(0x27, 20, 4); // I2C address 0x27, 20 columns, 4 rows
+// Rotary Encoder Pins
+#define ENCODER_CLK 2
+#define ENCODER_DT 3
+#define ENCODER_SW 4
 
-// ---- Menu Items ----
-String menuItems[] = {
-  "Option 1",
-  "Option 2",
-  "Option 3",
-  "Option 4",
-  "Option 5",
-  "Option 6",
-  "Option 7"
+// Saved Ratios (default values)
+int milkRatio = 60;
+int flavorRatio = 20;
+int bobaRatio = 20;
+
+// Drink Menu
+String drinkMenu[] = {
+  "Brown Sugar Tea",
+  "Strawberry Milk",
+  "Taro Milk Tea",
+  "Back to Control"
 };
-int menuSize = sizeof(menuItems) / sizeof(menuItems[0]); // Auto-detect menu size
+int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 
-volatile int menuIndex = 0;  // Current selection index
-int lastStateCLK;            // Previous state of CLK pin
-bool buttonPressed = false;  // State of encoder button
-int menuStartIndex = 0;      // Controls the scrolling
+// Control Menu
+String menuItems[] = {
+  "Run Diagnostics",
+  "RFID Access",
+  "Servo Trigger",
+  "Manual Axis Ctrl",
+  "LED Settings",
+  "Control Menu",
+  "Reset System"
+};
+int menuSize = sizeof(menuItems) / sizeof(menuItems[0]);
+
+volatile int menuIndex = 0;
+int menuStartIndex = 0;
+int lastStateCLK;
+bool buttonPressed = false;
+bool inDrinkMenu = false;
 
 void setup() {
-  lcd.init(); // Initialize the LCD
+  lcd.init();
   lcd.backlight();
 
-  // Initialize Rotary Encoder pins
   pinMode(ENCODER_CLK, INPUT);
   pinMode(ENCODER_DT, INPUT);
   pinMode(ENCODER_SW, INPUT_PULLUP);
+  lastStateCLK = digitalRead(ENCODER_CLK);
 
-  lastStateCLK = digitalRead(ENCODER_CLK); // Read initial state
-
-  updateMenuDisplay();
+  runHomingSequence();
+  showDrinkMenu();
 }
 
 void loop() {
-  // Read current state of CLK
-  int currentStateCLK = digitalRead(ENCODER_CLK);
-  
-  // If the state changed, determine direction
-  if (currentStateCLK != lastStateCLK) {
-    if (digitalRead(ENCODER_DT) != currentStateCLK) {
-      menuIndex++; // Scroll down
-    } else {
-      menuIndex--; // Scroll up
-    }
+  handleRotaryEncoder();
 
-    // Circular scrolling: loop around when reaching limits
-    if (menuIndex >= menuSize) {
-      menuIndex = 0;  // Wrap around to first option
-      menuStartIndex = 0;
-    }
-    if (menuIndex < 0) {
-      menuIndex = menuSize - 1;  // Wrap around to last option
-      menuStartIndex = menuSize - 3;
-      if (menuStartIndex < 0) menuStartIndex = 0;  // Prevent negative index
-    }
-
-    // Adjust menu start index for scrolling
-    if (menuIndex >= menuStartIndex + 3) {
-      menuStartIndex++;
-    } else if (menuIndex < menuStartIndex) {
-      menuStartIndex--;
-    }
-
-    updateMenuDisplay(); // Update display with new selection
-  }
-  
-  lastStateCLK = currentStateCLK; // Save last state
-
-  // Check if the encoder push button is pressed
-  if (digitalRead(ENCODER_SW) == LOW) {
-    if (!buttonPressed) {
-      selectMenuItem(); // Execute selected option
-      buttonPressed = true;
-    }
-  } else {
-    buttonPressed = false; // Reset flag when button is released
+  if (digitalRead(ENCODER_SW) == LOW && !buttonPressed) {
+    buttonPressed = true;
+    showSelectedMenu();
+  } else if (digitalRead(ENCODER_SW) == HIGH) {
+    buttonPressed = false;
   }
 }
 
-// Function to update the menu display
+void runHomingSequence() {
+  lcd.clear();
+  lcd.setCursor(1, 0); lcd.print("Homing Axes...");
+  lcd.setCursor(0, 2); lcd.print("Press to Skip");
+  delay(500);
+
+  while (digitalRead(ENCODER_SW) == HIGH) {
+    delay(10);
+    // Future: implement actual homing here
+  }
+}
+
+void showDrinkMenu() {
+  lcd.clear();
+  lcd.setCursor(1, 1); lcd.print("Milk Tea Selection");
+  delay(1500);
+
+  menuIndex = 0;
+  menuStartIndex = 0;
+  inDrinkMenu = true;
+  updateMenuDisplay();
+}
+
+void handleRotaryEncoder() {
+  int currentStateCLK = digitalRead(ENCODER_CLK);
+  if (currentStateCLK != lastStateCLK) {
+    if (digitalRead(ENCODER_DT) != currentStateCLK) {
+      menuIndex++;
+    } else {
+      menuIndex--;
+    }
+
+    int currentMenuSize = inDrinkMenu ? drinkMenuSize : menuSize;
+
+    if (menuIndex >= currentMenuSize) menuIndex = 0;
+    if (menuIndex < 0) menuIndex = currentMenuSize - 1;
+
+    if (menuIndex >= menuStartIndex + 3) menuStartIndex++;
+    else if (menuIndex < menuStartIndex) menuStartIndex--;
+
+    updateMenuDisplay();
+  }
+  lastStateCLK = currentStateCLK;
+}
+
 void updateMenuDisplay() {
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Select an Option:");
-
-  // Display up to 3 menu items at a time
+  lcd.print(inDrinkMenu ? "Drinks Menu:" : "Control Menu:");
   for (int i = 0; i < 3; i++) {
     int itemIndex = menuStartIndex + i;
-    if (itemIndex < menuSize) {
+    if (inDrinkMenu && itemIndex < drinkMenuSize) {
       lcd.setCursor(1, i + 1);
-      if (itemIndex == menuIndex) {
-        lcd.print("> "); // Highlight selected item
-      } else {
-        lcd.print("  "); // Regular spacing
-      }
+      lcd.print((itemIndex == menuIndex) ? "> " : "  ");
+      lcd.print(drinkMenu[itemIndex]);
+    } else if (!inDrinkMenu && itemIndex < menuSize) {
+      lcd.setCursor(1, i + 1);
+      lcd.print((itemIndex == menuIndex) ? "> " : "  ");
       lcd.print(menuItems[itemIndex]);
     }
   }
 }
 
-// Function to execute selected menu item
-void selectMenuItem() {
+void showSelectedMenu() {
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("You selected:");
-  
+  lcd.print("Selected:");
   lcd.setCursor(2, 2);
-  lcd.print(menuItems[menuIndex]); // Show selected item
 
-  delay(1500); // Pause for user to see selection
-  updateMenuDisplay(); // Return to menu
+  if (inDrinkMenu) {
+    lcd.print(drinkMenu[menuIndex]);
+    delay(1000);
+    if (drinkMenu[menuIndex] == "Back to Control") {
+      inDrinkMenu = false;
+      menuIndex = 0;
+      menuStartIndex = 0;
+    } else {
+      askBobaPreference();
+    }
+  } else {
+    lcd.print(menuItems[menuIndex]);
+    delay(1000);
+
+    if (menuItems[menuIndex] == "Reset System") {
+      runHomingSequence();
+      showDrinkMenu();
+      return;
+    }
+
+    if (menuItems[menuIndex] == "Control Menu") {
+      openControlMenu();
+      return;
+    }
+  }
+
+  updateMenuDisplay();
+}
+
+void askBobaPreference() {
+  bool addBoba = true;
+  bool confirmed = false;
+
+  while (!confirmed) {
+    lcd.clear();
+    lcd.setCursor(0, 0); lcd.print("Add Boba?");
+    lcd.setCursor(2, 2); lcd.print(addBoba ? "Yes" : "No");
+
+    int currentStateCLK = digitalRead(ENCODER_CLK);
+    if (currentStateCLK != lastStateCLK) {
+      addBoba = !addBoba;
+    }
+    lastStateCLK = currentStateCLK;
+
+    if (digitalRead(ENCODER_SW) == LOW) {
+      confirmed = true;
+      delay(300);
+    }
+  }
+
+  if (addBoba) {
+    adjustBobaPercentage();
+  } else {
+    bobaRatio = 0;
+  }
+
+  lcd.clear();
+  lcd.print("Starting drink...");
+  delay(1500);
+}
+
+void adjustBobaPercentage() {
+  int percentage = bobaRatio;
+
+  while (true) {
+    lcd.clear();
+    lcd.setCursor(0, 0); lcd.print("Set Boba Amount");
+    lcd.setCursor(2, 2); lcd.print(percentage); lcd.print("%");
+
+    int currentStateCLK = digitalRead(ENCODER_CLK);
+    if (currentStateCLK != lastStateCLK) {
+      percentage += (digitalRead(ENCODER_DT) != currentStateCLK) ? 5 : -5;
+      percentage = constrain(percentage, 0, 100);
+    }
+    lastStateCLK = currentStateCLK;
+
+    if (digitalRead(ENCODER_SW) == LOW) {
+      bobaRatio = percentage;
+      delay(300);
+      break;
+    }
+  }
+}
+
+void openControlMenu() {
+  int selection = 0;
+  int* values[3] = { &milkRatio, &flavorRatio, &bobaRatio };
+  const char* labels[3] = { "Milk %", "Flavor %", "Boba %" };
+
+  for (int i = 0; i < 3; i++) {
+    while (true) {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Adjust " + String(labels[i]));
+      lcd.setCursor(2, 2);
+      lcd.print(*values[i]); lcd.print("%");
+
+      int currentStateCLK = digitalRead(ENCODER_CLK);
+      if (currentStateCLK != lastStateCLK) {
+        *values[i] += (digitalRead(ENCODER_DT) != currentStateCLK) ? 5 : -5;
+        *values[i] = constrain(*values[i], 0, 100);
+      }
+      lastStateCLK = currentStateCLK;
+
+      if (digitalRead(ENCODER_SW) == LOW) {
+        delay(300);
+        break;
+      }
+    }
+  }
+
+  lcd.clear();
+  lcd.print("Defaults Saved!");
+  delay(1000);
 }
