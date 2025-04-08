@@ -75,7 +75,7 @@ void runHomingSequence() {
 
   while (digitalRead(ENCODER_SW) == HIGH) {
     delay(10);
-    // Future: implement actual homing here
+    // TODO: Add motor homing code here
   }
 }
 
@@ -192,9 +192,31 @@ void askBobaPreference() {
     bobaRatio = 0;
   }
 
+  bool addSyrup = false;
+  confirmed = false;
+
+  while (!confirmed) {
+    lcd.clear();
+    lcd.setCursor(0, 0); lcd.print("Add Syrup Ring?");
+    lcd.setCursor(2, 2); lcd.print(addSyrup ? "Yes" : "No");
+
+    int currentStateCLK = digitalRead(ENCODER_CLK);
+    if (currentStateCLK != lastStateCLK) {
+      addSyrup = !addSyrup;
+    }
+    lastStateCLK = currentStateCLK;
+
+    if (digitalRead(ENCODER_SW) == LOW) {
+      confirmed = true;
+      delay(300);
+    }
+  }
+
   lcd.clear();
-  lcd.print("Starting drink...");
+  lcd.print("Creating drink...");
   delay(1500);
+
+  startDrinkMakingProcess(addSyrup);
 }
 
 void adjustBobaPercentage() {
@@ -220,8 +242,120 @@ void adjustBobaPercentage() {
   }
 }
 
+void startDrinkMakingProcess(bool addSyrup) {
+  slideCupOut();
+  waitForCupGrab();
+
+  returnCupToCenter();
+  if (addSyrup) applySyrupRing();
+
+  dispenseMilk();
+  dispenseFlavor();
+  mixDrink();
+
+  if (bobaRatio > 0) {
+    moveToBoba();
+    dispenseBoba();
+  }
+
+  liftCup();
+  presentCupToUser();
+  waitToStartNewOrder();
+}
+
+void slideCupOut() {
+  lcd.clear();
+  lcd.print("Sliding cup out...");
+  delay(1500); // TODO: Replace with motor movement
+}
+
+void waitForCupGrab() {
+  lcd.clear();
+  lcd.print("Place cup inside");
+  lcd.setCursor(0, 2);
+  lcd.print("Press to cont...");
+  while (digitalRead(ENCODER_SW) == HIGH) delay(10);
+}
+
+void returnCupToCenter() {
+  lcd.clear();
+  lcd.print("Returning cup...");
+  delay(1500); // TODO: Replace with motor logic
+}
+
+void applySyrupRing() {
+  lcd.clear();
+  lcd.print("Applying syrup ring...");
+  delay(1500); // TODO: Replace with motor + dispenser logic
+}
+
+void dispenseMilk() {
+  lcd.clear();
+  lcd.print("Dispensing Milk");
+  lcd.setCursor(0, 2); lcd.print(milkRatio); lcd.print("%");
+  delay(1500); // TODO: Add milk pump logic
+}
+
+void dispenseFlavor() {
+  lcd.clear();
+  lcd.print("Adding Flavor");
+  lcd.setCursor(0, 2); lcd.print(flavorRatio); lcd.print("%");
+  delay(1500); // TODO: Add flavor logic
+}
+
+void mixDrink() {
+  lcd.clear();
+  lcd.print("Mixing drink...");
+  delay(2000); // TODO: Mixer motor logic
+}
+
+void moveToBoba() {
+  lcd.clear();
+  lcd.print("Positioning Boba");
+  delay(1000); // TODO: motor movement to boba dispenser
+}
+
+void dispenseBoba() {
+  lcd.clear();
+  lcd.print("Dispensing Boba");
+  delay(1500); // TODO: add boba dispensing logic
+}
+
+void liftCup() {
+  lcd.clear();
+  lcd.print("Raising mixer...");
+  delay(1000); // TODO: Raise Z axis
+}
+
+void presentCupToUser() {
+  lcd.clear();
+  lcd.print("Slide out cup");
+  lcd.setCursor(0, 1);
+  lcd.print("Grab & Press Btn");
+  while (digitalRead(ENCODER_SW) == HIGH) delay(10);
+
+  lcd.clear();
+  lcd.print("Cup retrieved!");
+  delay(1000);
+}
+
+void waitToStartNewOrder() {
+  lcd.clear();
+  lcd.print("Start another?");
+  lcd.setCursor(0, 2);
+  lcd.print("Press button...");
+
+  while (digitalRead(ENCODER_SW) == HIGH) delay(10);
+
+  lcd.clear();
+  lcd.print("Resetting system...");
+  delay(1000);
+
+  runHomingSequence();
+  showDrinkMenu();
+}
+
 void openControlMenu() {
-  int selection = 0;
   int* values[3] = { &milkRatio, &flavorRatio, &bobaRatio };
   const char* labels[3] = { "Milk %", "Flavor %", "Boba %" };
 
