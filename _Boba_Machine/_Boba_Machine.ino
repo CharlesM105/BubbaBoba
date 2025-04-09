@@ -44,6 +44,8 @@ bool buttonPressed = false;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
 
+void waitForCupGrab(); // ← add this near the top, under your global variables
+
 String drinkMenu[] = { "Brown Sugar Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control" };
 int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 
@@ -106,15 +108,45 @@ void loop() {
 void performHoming() {
   lcd.clear(); lcd.print("Homing in progress");
 
-  // Example for X axis (Stepper1)
-  while (digitalRead(3) == HIGH) {
-    stepper1.moveTo(stepper1.currentPosition() - 1);
+  // HOMING STEPPER 1 (X AXIS)
+  stepper1.setMaxSpeed(5000.0);
+  stepper1.setAcceleration(1000.0);
+  Serial.println("Stepper 1 is Homing");
+  while (digitalRead(4) != HIGH) { // Using Pin 4 for Stepper 1 Limit Switch
+    stepper1.moveTo(stepper1.currentPosition() + 1);
     stepper1.run();
+    delay(5);
   }
   stepper1.setCurrentPosition(0);
+  Serial.println("Homing 1 Completed");
 
-  // Repeat similar logic for Y and Z (Stepper2 & 3)
+  // HOMING STEPPER 4 (CUP SLIDE AXIS)
+  stepper4.setMaxSpeed(5000.0);
+  stepper4.setAcceleration(1000.0);
+  Serial.println("Stepper 2 is Homing");
+  while (digitalRead(2) != HIGH) { // Using Pin 2 for Stepper 4 Limit Switch
+    stepper4.moveTo(stepper4.currentPosition() - 1);
+    stepper4.run();
+    delay(5);
+  }
+  stepper4.setCurrentPosition(0);
+  Serial.println("Homing 2 Completed");
+
+  // HOMING STEPPER 3 (Z AXIS)
+  stepper3.setMaxSpeed(5000.0);
+  stepper3.setAcceleration(1000.0);
+  Serial.println("Stepper 3 is Homing");
+  while (digitalRead(3) != HIGH) { // Using Pin 3 for Stepper 3 Limit Switch
+    stepper3.moveTo(stepper3.currentPosition() - 1);
+    stepper3.run();
+    delay(5);
+  }
+  stepper3.setCurrentPosition(0);
+  Serial.println("Homing 3 Completed");
+
+  // HOMING COMPLETE
   lcd.setCursor(0, 1); lcd.print("Homing Complete");
+  Serial.println("Full Homing Sequence Completed");
   delay(1500);
 }
 
@@ -260,63 +292,98 @@ void startDrinkMakingProcess(bool addSyrup) {
 
 void slideCupOut() {
   lcd.clear(); lcd.print("Sliding cup out...");
-  delay(1500); // TODO: Motor logic
-}
-
-void waitForCupGrab() {
-  lcd.clear(); lcd.print("Place cup inside");
-  lcd.setCursor(0, 2); lcd.print("Press to cont...");
-  while (digitalRead(ENCODER_SW) == HIGH) delay(10);
+  stepper4.moveTo(1000); // Slide out
+  while (stepper4.distanceToGo() != 0) stepper4.run();
+  delay(500);
 }
 
 void returnCupToCenter() {
   lcd.clear(); lcd.print("Returning cup...");
-  delay(1500); // TODO: Motor logic
+  stepper4.moveTo(0); // Return to center
+  while (stepper4.distanceToGo() != 0) stepper4.run();
+  delay(500);
 }
 
 void applySyrupRing() {
   lcd.clear(); lcd.print("Applying syrup...");
-  delay(1500); // TODO: Syrup logic
+  stepper1.moveTo(500); // Move to syrup zone
+  while (stepper1.distanceToGo() != 0) stepper1.run();
+  delay(500);
+  stepper1.moveTo(0); // Return
+  while (stepper1.distanceToGo() != 0) stepper1.run();
+  delay(500);
 }
 
 void dispenseMilk() {
   lcd.clear(); lcd.print("Dispensing Milk");
   lcd.setCursor(0, 2); lcd.print(milkRatio); lcd.print("%");
-  delay(1500); // TODO: Milk logic
+  stepper2.moveTo(milkRatio * 10); // Simulate pump
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(500);
+  stepper2.moveTo(0);
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(300);
 }
 
 void dispenseFlavor() {
   lcd.clear(); lcd.print("Adding Flavor");
   lcd.setCursor(0, 2); lcd.print(flavorRatio); lcd.print("%");
-  delay(1500); // TODO: Flavor logic
+  stepper2.moveTo(flavorRatio * 10);
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(500);
+  stepper2.moveTo(0);
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(300);
 }
 
 void mixDrink() {
   lcd.clear(); lcd.print("Mixing drink...");
-  delay(2000); // TODO: Mixer logic
+  stepper3.moveTo(500); // Lower + spin
+  while (stepper3.distanceToGo() != 0) stepper3.run();
+  delay(500);
+  stepper3.moveTo(0); // Return
+  while (stepper3.distanceToGo() != 0) stepper3.run();
+  delay(500);
 }
 
 void moveToBoba() {
   lcd.clear(); lcd.print("Positioning Boba");
-  delay(1000); // TODO: Stepper movement
+  stepper1.moveTo(1000); // Move under boba
+  while (stepper1.distanceToGo() != 0) stepper1.run();
+  delay(500);
 }
 
 void dispenseBoba() {
   lcd.clear(); lcd.print("Dispensing Boba");
-  delay(1500); // TODO: Boba logic
+  stepper2.moveTo(bobaRatio * 10);
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(500);
+  stepper2.moveTo(0);
+  while (stepper2.distanceToGo() != 0) stepper2.run();
+  delay(500);
 }
 
 void liftCup() {
   lcd.clear(); lcd.print("Raising mixer...");
-  delay(1000); // TODO: Raise Z
+  stepper3.moveTo(300); // Raise
+  while (stepper3.distanceToGo() != 0) stepper3.run();
+  delay(500);
+  stepper3.moveTo(0);
+  while (stepper3.distanceToGo() != 0) stepper3.run();
+  delay(500);
 }
 
 void presentCupToUser() {
   lcd.clear(); lcd.print("Slide out cup");
   lcd.setCursor(0, 1); lcd.print("Grab & Press Btn");
+  stepper4.moveTo(1000); // Slide cup out again
+  while (stepper4.distanceToGo() != 0) stepper4.run();
   while (digitalRead(ENCODER_SW) == HIGH) delay(10);
   lcd.clear(); lcd.print("Cup retrieved!");
   delay(1000);
+  stepper4.moveTo(0); // Pull tray back in
+  while (stepper4.distanceToGo() != 0) stepper4.run();
+  delay(500);
 }
 
 void waitToStartNewOrder() {
