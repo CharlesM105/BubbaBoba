@@ -1,4 +1,4 @@
-#include <AccelStepper.h>
+
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
@@ -28,11 +28,6 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB +
 
 Servo servo_A0;
 
-// Stepper Motors
-AccelStepper stepper1(1, 13, 12);
-AccelStepper stepper2(1, 11, 10);
-AccelStepper stepper3(1, 9, 8);
-AccelStepper stepper4(1, 7, 6);
 
 // ==== Global Variables ====
 int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
@@ -55,11 +50,7 @@ void setup() {
   lcd.init(); lcd.backlight();
   lcd.setCursor(3, 1); lcd.print("YUMMY BOBA BOT");
   delay(1500);
-
-  for (int i = 1; i <= 4; i++) {
-    AccelStepper* s = (i == 1) ? &stepper1 : (i == 2) ? &stepper2 : (i == 3) ? &stepper3 : &stepper4;
-    s->setMaxSpeed(1000); s->setAcceleration(1000); s->setCurrentPosition(0);
-  }
+}
 
   pinMode(ENCODER_CLK, INPUT);
   pinMode(ENCODER_DT, INPUT);
@@ -104,49 +95,15 @@ void loop() {
 }
 
 void performHoming() {
-  lcd.clear(); lcd.print("Homing in progress");
+  lcd.clear();
+  lcd.print("Homing in progress");
 
-  // HOMING STEPPER 1 (X AXIS)
-  stepper1.setMaxSpeed(5000.0);
-  stepper1.setAcceleration(1000.0);
-  Serial.println("Stepper 1 is Homing");
-  while (digitalRead(4) != HIGH) { // Using Pin 4 for Stepper 1 Limit Switch
-    stepper1.moveTo(stepper1.currentPosition() + 1);
-    stepper1.run();
-    delay(5);
-  }
-  stepper1.setCurrentPosition(0);
-  Serial.println("Homing 1 Completed");
+//insert code for communicating w/ uno
 
-  // HOMING STEPPER 4 (CUP SLIDE AXIS)
-  stepper4.setMaxSpeed(5000.0);
-  stepper4.setAcceleration(1000.0);
-  Serial.println("Stepper 2 is Homing");
-  while (digitalRead(2) != HIGH) { // Using Pin 2 for Stepper 4 Limit Switch
-    stepper4.moveTo(stepper4.currentPosition() - 1);
-    stepper4.run();
-    delay(5);
-  }
-  stepper4.setCurrentPosition(0);
-  Serial.println("Homing 2 Completed");
+  lcd.clear();
+  lcd.print("Homing is complete");
 
-  // HOMING STEPPER 3 (Z AXIS)
-  stepper3.setMaxSpeed(5000.0);
-  stepper3.setAcceleration(1000.0);
-  Serial.println("Stepper 3 is Homing");
-  while (digitalRead(3) != HIGH) { // Using Pin 3 for Stepper 3 Limit Switch
-    stepper3.moveTo(stepper3.currentPosition() - 1);
-    stepper3.run();
-    delay(5);
-  }
-  stepper3.setCurrentPosition(0);
-  Serial.println("Homing 3 Completed");
 
-  // HOMING COMPLETE
-  lcd.setCursor(0, 1); lcd.print("Homing Complete");
-  Serial.println("Full Homing Sequence Completed");
-  delay(1500);
-}
 
 void handleRotaryEncoder() {
   int currentStateCLK = digitalRead(ENCODER_CLK);
@@ -243,14 +200,16 @@ void askBobaPreference() {
   confirmed = false;
   while (!confirmed) {
     lcd.clear(); lcd.setCursor(0, 0); lcd.print("Add Syrup Ring?");
-    lcd.setCursor(2, 2); lcd.print(addSyrup ? "Yes" : "No");
+    lcd.setCursor(2, 2); 
+    lcd.print(addSyrup ? "Yes" : "No");
     int clk = digitalRead(ENCODER_CLK);
     if (clk != lastStateCLK) addSyrup = !addSyrup;
     lastStateCLK = clk;
     if (digitalRead(ENCODER_SW) == LOW) { confirmed = true; delay(300); }
   }
 
-  lcd.clear(); lcd.print("Creating drink...");
+  lcd.clear(); 
+  lcd.print("Creating drink...");
   delay(1500);
   startDrinkMakingProcess(addSyrup);
 }
@@ -258,8 +217,12 @@ void askBobaPreference() {
 void adjustBobaPercentage() {
   int percentage = bobaRatio;
   while (true) {
-    lcd.clear(); lcd.setCursor(0, 0); lcd.print("Set Boba Amount");
-    lcd.setCursor(2, 2); lcd.print(percentage); lcd.print("%");
+    lcd.clear(); 
+    lcd.setCursor(0, 0); 
+    lcd.print("Set Boba Amount");
+    lcd.setCursor(2, 2); 
+    lcd.print(percentage); 
+    lcd.print("%");
 
     int clk = digitalRead(ENCODER_CLK);
     if (clk != lastStateCLK) {
@@ -296,14 +259,16 @@ void slideCupOut() {
 }
 
 void returnCupToCenter() {
-  lcd.clear(); lcd.print("Returning cup...");
+  lcd.clear(); 
+  lcd.print("Returning cup...");
   stepper4.moveTo(0); // Return to center
   while (stepper4.distanceToGo() != 0) stepper4.run();
   delay(500);
 }
 
 void applySyrupRing() {
-  lcd.clear(); lcd.print("Applying syrup...");
+  lcd.clear(); 
+  lcd.print("Applying syrup...");
   stepper1.moveTo(500); // Move to syrup zone
   while (stepper1.distanceToGo() != 0) stepper1.run();
   delay(500);
