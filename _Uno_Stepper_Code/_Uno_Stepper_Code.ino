@@ -18,6 +18,9 @@ AccelStepper stepper4(1,7,6);
 
 void setup() {
 
+  pinMode(A0, OUTPUT);
+  pinMode(A1, INPUT);
+
        Serial.begin (9600);
      Serial.println("Power On");
      
@@ -45,6 +48,7 @@ void setup() {
    stepper3.setCurrentPosition(0);
    stepper4.setCurrentPosition(0);
 
+    analogWrite(A0, 0);
 }
 
 void loop() {
@@ -53,6 +57,7 @@ void loop() {
   //homing stepper 1
      if (Homing1 != 0){
 
+analogWrite(A0, 0);
   stepper1.setMaxSpeed(3000.0);  
   stepper1.setAcceleration(3000.0); 
 
@@ -145,7 +150,8 @@ void loop() {
      Homing3 = 0;
   }
 
-Serial.println("Full Homing Sequence Completed");
+  Serial.println("HOMED");
+  delay(1000);
 
  }
 
@@ -170,7 +176,7 @@ ZStepValue = 0;
     stepper2.moveTo(ZStepValue);  
     ZStepValue--;  
     stepper2.run(); 
-    delay(4);
+    delay(2);
   }
  
  Dispense = 0;
