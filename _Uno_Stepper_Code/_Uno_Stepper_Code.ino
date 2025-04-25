@@ -2,8 +2,6 @@
 #include <AccelStepper.h>
 #include <SoftwareSerial.h>
 
-SoftwareSerial serialInput(4, 5); // RX = 4, TX = 5 (TX unused)
-
 int Homing1 = 1;
 int Homing2 = 1;
 int Homing3 = 1;
@@ -24,7 +22,6 @@ void setup() {
   pinMode(A1, INPUT);
 
   Serial.begin(9600);
-  serialInput.begin(9600);
   Serial.println("Power On");
 
   stepper1.setMaxSpeed(1000);
@@ -87,13 +84,9 @@ void loop() {
     Serial.println("HOMED");
   }
 
-  if (serialInput.available()) {
-    String command = serialInput.readStringUntil('\n');
-    command.trim();
-    if (command == "DISPENSE") {
+    if (insert photoresistor here) {
       Dispense = 1;
     }
-  }
 
   if (Dispense != 0) {
     delay(1000);
