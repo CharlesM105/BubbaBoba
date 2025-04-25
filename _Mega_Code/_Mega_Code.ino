@@ -1,4 +1,3 @@
-
 // === Arduino Mega (Menu UI) ===
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
@@ -18,7 +17,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 #define LED_STRIP_PIN 30
 #define NUMPIXELS 200
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 #define ENCODER_CLK 49
 #define ENCODER_DT 51
@@ -30,7 +29,7 @@ Servo servo_A2;
 int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
 int redColor = 0, greenColor = 0, blueColor = 0;
 int currentBrightness = 51;
-bool isAllowed = false;
+
 int lastStateCLK;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
@@ -94,7 +93,6 @@ void loop() {
     while (1) {}
   }
 
-  // Manual Serial Monitor Trigger
   if (Serial.available()) {
     String command = Serial.readStringUntil('\n');
     command.trim();
@@ -131,41 +129,63 @@ void handleRotaryEncoder() {
   if (currentStateCLK != lastStateCLK && currentStateCLK == HIGH) {
     lastEncoderMove = millis();
     int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+
     if (currentStateDT == LOW) {
       menuIndex++;
     } else {
       menuIndex--;
     }
+
     if (menuIndex < 0) menuIndex = menuSize - 1;
     if (menuIndex >= menuSize) menuIndex = 0;
+
     showDrinkMenu();
   }
+
   lastStateCLK = currentStateCLK;
 }
 
 void showDrinkMenu() {
-  lcd.clear();
+  static int lastMenuIndex = -1;
+  static int lastMenuStartIndex = -1;
+  static bool lastInDrinkMenu = !inDrinkMenu;
+
+  if (menuIndex == lastMenuIndex &&
+      menuStartIndex == lastMenuStartIndex &&
+      inDrinkMenu == lastInDrinkMenu) return;
+
+  lastMenuIndex = menuIndex;
+  lastMenuStartIndex = menuStartIndex;
+  lastInDrinkMenu = inDrinkMenu;
+
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
   int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+
   if (menuIndex < menuStartIndex) {
     menuStartIndex = menuIndex;
   } else if (menuIndex >= menuStartIndex + LCD_LINES) {
     menuStartIndex = menuIndex - LCD_LINES + 1;
   }
+
   for (int i = 0; i < LCD_LINES; i++) {
     int itemIndex = menuStartIndex + i;
+    lcd.setCursor(0, i);
     if (itemIndex < menuSize) {
-      lcd.setCursor(0, i);
-      lcd.print((itemIndex == menuIndex ? "> " : "  ") + menu[itemIndex]);
+      String line = (itemIndex == menuIndex ? "> " : "  ") + menu[itemIndex];
+      lcd.print(line);
+      int padding = LCD_COLUMNS - line.length();
+      while (padding-- > 0) lcd.print(" ");
+    } else {
+      lcd.print("                    ");
     }
   }
 }
 
 void selectMenuItem() {
+  lcd.clear();
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
   String selection = menu[menuIndex];
 
-  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Selected:");
   lcd.setCursor(0, 1);
@@ -216,11 +236,13 @@ void selectMenuItem() {
       lcd.print("Manual Ctrl TBD");
       delay(1000);
     }
+
     if (selection != "Reset System") {
       inDrinkMenu = true;
       menuIndex = 0;
       menuStartIndex = 0;
     }
   }
-  showDrinkMenu();
+
+  menuIndex = -1; // force LCD redraw
 }
