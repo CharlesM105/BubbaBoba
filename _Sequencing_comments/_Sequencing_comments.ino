@@ -14,11 +14,6 @@ AccelStepper stepper3(AccelStepper::DRIVER, 9, 8); // Stepper3 = 360° Rotary Bo
 // === Servo ===
 Servo coverServo;
 
-// === Relays ===
-#define RELAY_SPINNY_EYES 2
-#define RELAY_MIXER 3
-#define RELAY_BOBA_SHAKER 4
-
 // === Limit Switches ===
 #define LIMIT_X 4
 #define LIMIT_Y 2

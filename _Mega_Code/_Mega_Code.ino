@@ -1,4 +1,3 @@
-// === Arduino Mega (Menu UI) ===
 #include <Servo.h>
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
@@ -6,23 +5,38 @@
 #include <Adafruit_NeoPixel.h>
 #include <avr/wdt.h>
 
+// === LCD ===
 #define I2C_ADDR 0x27
 #define LCD_COLUMNS 20
 #define LCD_LINES 4
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
+// === RFID ===
 #define SS_PIN 10
 #define RST_PIN 9
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
+// === LEDs ===
 #define LED_STRIP_PIN 30
 #define NUMPIXELS 200
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
+// === Rotary Encoder ===
 #define ENCODER_CLK 49
 #define ENCODER_DT 51
 #define ENCODER_SW 53
 #define RESET_BUTTON_PIN 6
+
+// === Relays ===
+#define RELAY_SPINNY_EYES 2
+#define RELAY_MIXER 3
+#define RELAY_BOBA_SHAKER 4
+
+// === Pump Relays ===
+#define RELAY_MILK 2
+#define RELAY_FLAVOR_1 3
+#define RELAY_FLAVOR_2 4
+#define RELAY_FLAVOR_3 5
 
 Servo servo_A2;
 
@@ -57,6 +71,16 @@ void setup() {
   pinMode(ENCODER_DT, INPUT);
   pinMode(ENCODER_SW, INPUT_PULLUP);
   pinMode(RESET_BUTTON_PIN, INPUT_PULLUP);
+
+  pinMode(RELAY_FLAVOR_1, OUTPUT);
+  pinMode(RELAY_FLAVOR_2, OUTPUT);
+  pinMode(RELAY_FLAVOR_3, OUTPUT);
+  pinMode(RELAY_MILK, OUTPUT);
+
+  digitalWrite(RELAY_FLAVOR_1, LOW);
+  digitalWrite(RELAY_FLAVOR_2, LOW);
+  digitalWrite(RELAY_FLAVOR_3, LOW);
+  digitalWrite(RELAY_MILK, LOW);
 
   lastStateCLK = digitalRead(ENCODER_CLK);
 
@@ -198,11 +222,7 @@ void selectMenuItem() {
       menuIndex = 0;
       menuStartIndex = 0;
     } else {
-      lcd.clear();
-      lcd.print("Making: ");
-      lcd.print(selection);
-      Serial1.println("DISPENSE");
-      delay(2000);
+      makeDrink(selection);
     }
   } else {
     if (selection == "Reset System") {
@@ -245,4 +265,90 @@ void selectMenuItem() {
   }
 
   menuIndex = -1; // force LCD redraw
+}
+
+// === Custom Drink Sequences ===
+void makeDrink(String drinkName) {
+  lcd.clear();
+  lcd.print("Dispensing:");
+  lcd.setCursor(0, 1);
+  lcd.print(drinkName);
+  delay(1000);
+
+  // === Brown Sugar Tea ===
+  if (drinkName == "Brown Sugar Tea") {
+    // Step 1: Dispense flavor (Brown Sugar)
+    digitalWrite(A0, HIGH);
+    
+    digitalWrite(RELAY_FLAVOR_1, HIGH);
+    delay(1000);  // Adjust timing as needed
+    digitalWrite(RELAY_FLAVOR_1, LOW);
+
+    // Step 2: Dispense milk
+    digitalWrite(RELAY_MILK, HIGH);
+    delay(1500);
+    digitalWrite(RELAY_MILK, LOW);
+
+    // Step 3: Add boba (optional)
+    // Serial1.println("DISPENSE_BOBA");
+
+    // Step 4: Mix the drink (optional)
+    // digitalWrite(RELAY_MIXER, HIGH);
+    // delay(2000);
+    // digitalWrite(RELAY_MIXER, LOW);
+
+    // Step 5: Visual effects (optional)
+    // pixels.fill(pixels.Color(255, 120, 0));
+    // pixels.show();
+  }
+
+  // === Strawberry Milk ===
+  else if (drinkName == "Strawberry Milk") {
+    // Step 1: Dispense flavor (Strawberry)
+    digitalWrite(RELAY_FLAVOR_2, HIGH);
+    delay(1000);
+    digitalWrite(RELAY_FLAVOR_2, LOW);
+
+    // Step 2: Dispense milk
+    digitalWrite(RELAY_MILK, HIGH);
+    delay(2000);
+    digitalWrite(RELAY_MILK, LOW);
+
+    // Step 3: Add boba (optional)
+    // Serial1.println("DISPENSE_BOBA");
+
+    // Step 4: Mix (optional)
+    // digitalWrite(RELAY_MIXER, HIGH);
+    // delay(2000);
+    // digitalWrite(RELAY_MIXER, LOW);
+  }
+
+  // === Taro Milk Tea ===
+  else if (drinkName == "Taro Milk Tea") {
+    // Step 1: Dispense flavor (Taro)
+    digitalWrite(RELAY_FLAVOR_3, HIGH);
+    delay(1000);
+    digitalWrite(RELAY_FLAVOR_3, LOW);
+
+    // Step 2: Dispense milk
+    digitalWrite(RELAY_MILK, HIGH);
+    delay(1800);
+    digitalWrite(RELAY_MILK, LOW);
+
+    // Step 3: Add boba (optional)
+    // Serial1.println("DISPENSE_BOBA");
+
+    // Step 4: Mix (optional)
+    // digitalWrite(RELAY_MIXER, HIGH);
+    // delay(2000);
+    // digitalWrite(RELAY_MIXER, LOW);
+  }
+
+  // === Wrap-Up ===
+  Serial1.println("DISPENSE");  // Tells the Uno to move the cup out
+  delay(1000);
+
+  lcd.clear();
+  lcd.print("Enjoy your drink!");
+  delay(2000);
 }
