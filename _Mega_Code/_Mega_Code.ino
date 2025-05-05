@@ -31,19 +31,20 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define RELAY_SPINNY_EYES 2
 #define RELAY_MIXER 3
 #define RELAY_BOBA_SHAKER 4
-
-// === Pump Relays ===
 #define RELAY_MILK 2
 #define RELAY_FLAVOR_1 3
 #define RELAY_FLAVOR_2 4
 #define RELAY_FLAVOR_3 5
 
+// === Servo ===
 Servo servo_A2;
 
+// === Ratios and Colors ===
 int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
 int redColor = 0, greenColor = 0, blueColor = 0;
 int currentBrightness = 51;
 
+// === Encoder and Menu ===
 int lastStateCLK;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
@@ -76,6 +77,9 @@ void setup() {
   pinMode(RELAY_FLAVOR_2, OUTPUT);
   pinMode(RELAY_FLAVOR_3, OUTPUT);
   pinMode(RELAY_MILK, OUTPUT);
+
+  pinMode(A0, OUTPUT);          // A0 used to trigger Uno
+  digitalWrite(A0, LOW);        // Ensure it starts LOW
 
   digitalWrite(RELAY_FLAVOR_1, LOW);
   digitalWrite(RELAY_FLAVOR_2, LOW);
@@ -121,8 +125,10 @@ void loop() {
     String command = Serial.readStringUntil('\n');
     command.trim();
     if (command == "dispense") {
-      Serial1.println("DISPENSE");
-      Serial.println("Sent DISPENSE to UNO");
+      digitalWrite(A0, HIGH);
+      delay(100);
+      digitalWrite(A0, LOW);
+      Serial.println("Sent DISPENSE signal through A0");
     }
   }
 }
@@ -249,7 +255,9 @@ void selectMenuItem() {
     } else if (selection == "Run Diagnostics") {
       lcd.clear();
       lcd.print("Running tests...");
-      Serial1.println("DISPENSE");
+      digitalWrite(A0, HIGH);
+      delay(100);
+      digitalWrite(A0, LOW);
       delay(1000);
     } else if (selection == "Manual Axis Ctrl") {
       lcd.clear();
@@ -264,10 +272,9 @@ void selectMenuItem() {
     }
   }
 
-  menuIndex = -1; // force LCD redraw
+  menuIndex = -1;
 }
 
-// === Custom Drink Sequences ===
 void makeDrink(String drinkName) {
   lcd.clear();
   lcd.print("Dispensing:");
@@ -275,78 +282,48 @@ void makeDrink(String drinkName) {
   lcd.print(drinkName);
   delay(1000);
 
-  // === Brown Sugar Tea ===
   if (drinkName == "Brown Sugar Tea") {
-    // Step 1: Dispense flavor (Brown Sugar)
-    digitalWrite(A0, HIGH);
-    
-    digitalWrite(RELAY_FLAVOR_1, HIGH);
-    delay(1000);  // Adjust timing as needed
-    digitalWrite(RELAY_FLAVOR_1, LOW);
+//talk tuah uno
+  digitalWrite(A0, HIGH);
+  delay(100);
+  digitalWrite(A0, LOW);
+  delay(1000);
 
-    // Step 2: Dispense milk
+    digitalWrite(RELAY_FLAVOR_1, HIGH);
+    delay(1000);
+    digitalWrite(RELAY_FLAVOR_1, LOW);
     digitalWrite(RELAY_MILK, HIGH);
     delay(1500);
     digitalWrite(RELAY_MILK, LOW);
 
-    // Step 3: Add boba (optional)
-    // Serial1.println("DISPENSE_BOBA");
+  } else if (drinkName == "Strawberry Milk") {
+    //talk tuah uno
+  digitalWrite(A0, HIGH);
+  delay(100);
+  digitalWrite(A0, LOW);
+  delay(1000);
 
-    // Step 4: Mix the drink (optional)
-    // digitalWrite(RELAY_MIXER, HIGH);
-    // delay(2000);
-    // digitalWrite(RELAY_MIXER, LOW);
-
-    // Step 5: Visual effects (optional)
-    // pixels.fill(pixels.Color(255, 120, 0));
-    // pixels.show();
-  }
-
-  // === Strawberry Milk ===
-  else if (drinkName == "Strawberry Milk") {
-    // Step 1: Dispense flavor (Strawberry)
     digitalWrite(RELAY_FLAVOR_2, HIGH);
     delay(1000);
     digitalWrite(RELAY_FLAVOR_2, LOW);
-
-    // Step 2: Dispense milk
     digitalWrite(RELAY_MILK, HIGH);
     delay(2000);
     digitalWrite(RELAY_MILK, LOW);
 
-    // Step 3: Add boba (optional)
-    // Serial1.println("DISPENSE_BOBA");
+  } else if (drinkName == "Taro Milk Tea") {
+    //talk tuah uno
+  digitalWrite(A0, HIGH);
+  delay(100);
+  digitalWrite(A0, LOW);
+  delay(1000);
 
-    // Step 4: Mix (optional)
-    // digitalWrite(RELAY_MIXER, HIGH);
-    // delay(2000);
-    // digitalWrite(RELAY_MIXER, LOW);
-  }
-
-  // === Taro Milk Tea ===
-  else if (drinkName == "Taro Milk Tea") {
-    // Step 1: Dispense flavor (Taro)
     digitalWrite(RELAY_FLAVOR_3, HIGH);
     delay(1000);
     digitalWrite(RELAY_FLAVOR_3, LOW);
-
-    // Step 2: Dispense milk
     digitalWrite(RELAY_MILK, HIGH);
     delay(1800);
     digitalWrite(RELAY_MILK, LOW);
-
-    // Step 3: Add boba (optional)
-    // Serial1.println("DISPENSE_BOBA");
-
-    // Step 4: Mix (optional)
-    // digitalWrite(RELAY_MIXER, HIGH);
-    // delay(2000);
-    // digitalWrite(RELAY_MIXER, LOW);
   }
-
-  // === Wrap-Up ===
-  Serial1.println("DISPENSE");  // Tells the Uno to move the cup out
-  delay(1000);
 
   lcd.clear();
   lcd.print("Enjoy your drink!");

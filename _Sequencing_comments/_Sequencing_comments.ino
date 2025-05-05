@@ -1,4 +1,4 @@
-// === Arduino Uno Full Drink Sequencing with Correct Homing + Stepper3 (Boba Dispenser) ===
+// === Arduino Uno Full Drink Sequencing with Correct Homing + Stepper3 (Boba Dispenser) + External Trigger ===
 
 #include <AccelStepper.h>
 #include <Servo.h>
@@ -11,13 +11,21 @@ AccelStepper stepper3(AccelStepper::DRIVER, 9, 8); // Stepper3 = 360° Rotary Bo
 
 #define STEPS_PER_REV 200  // Adjust based on your motor
 
-// === Servo ===
-Servo coverServo;
-
 // === Limit Switches ===
 #define LIMIT_X 4
 #define LIMIT_Y 2
 #define LIMIT_Z 3
+
+// === Trigger Pin from External Arduino ===
+#define TRIGGER_PIN A0  // Input signal to start sequence
+
+// === Relays (define if you’re using them) ===
+#define RELAY_SPINNY_EYES 5
+#define RELAY_MIXER 6
+#define RELAY_BOBA_SHAKER 7
+
+// === Servo ===
+Servo coverServo;
 
 // === Variables ===
 int HomingStepValueX = 0;
@@ -42,11 +50,15 @@ void setup() {
   stepper3.setAcceleration(500);
   stepper3.setCurrentPosition(0);
 
-  // Servo Settings
-  coverServo.attach(A0);
-  coverServo.write(0); // Closed
+  // Limit Switch Settings
+  pinMode(LIMIT_X, INPUT_PULLUP);
+  pinMode(LIMIT_Y, INPUT_PULLUP);
+  pinMode(LIMIT_Z, INPUT_PULLUP);
 
-  // Relay Settings
+  // Trigger Input
+  pinMode(TRIGGER_PIN, INPUT);
+
+  // Relays
   pinMode(RELAY_SPINNY_EYES, OUTPUT);
   pinMode(RELAY_MIXER, OUTPUT);
   pinMode(RELAY_BOBA_SHAKER, OUTPUT);
@@ -54,23 +66,16 @@ void setup() {
   digitalWrite(RELAY_MIXER, LOW);
   digitalWrite(RELAY_BOBA_SHAKER, LOW);
 
-  // Limit Switch Settings
-  pinMode(LIMIT_X, INPUT_PULLUP);
-  pinMode(LIMIT_Y, INPUT_PULLUP);
-  pinMode(LIMIT_Z, INPUT_PULLUP);
+  // Servo
+  coverServo.attach(A1);
+  coverServo.write(0);
 
   Serial.println("Resetting Systems...");
   homeAllMotors();
-  waitForRFID();
-  selectFlavor();
-  selectMilkRatio();
-  selectBobaOption();
-  waitForStartButton();
-  runDrinkSequence();
 }
 
 void loop() {
-  // Empty
+  runDrinkSequence();  // Check and run when triggered
 }
 
 // === Homing ===
@@ -111,99 +116,87 @@ void homeAllMotors() {
   Serial.println("Homing Z Complete");
 
   Serial.println("All Motors Homed");
-
-  Serial.println("Extending Y and Raising Z...");
-  stepperY.setMaxSpeed(1000);
-  stepperY.setAcceleration(1000);
-  stepperY.moveTo(800);
-  stepperY.runToPosition();
-  Serial.println("Y Axis Extended Out");
-
-  stepperZ.setMaxSpeed(1000);
-  stepperZ.setAcceleration(1000);
-  stepperZ.moveTo(500);
-  stepperZ.runToPosition();
-  Serial.println("Z Axis Raised Up");
 }
-
-// === Simulated Menu Inputs ===
-void waitForRFID() { delay(2000); Serial.println("RFID Card Swiped"); }
-void selectFlavor() { Serial.println("Flavor Selected"); }
-void selectMilkRatio() { Serial.println("Milk Ratio Selected"); }
-void selectBobaOption() { Serial.println("Boba Option Selected"); }
-void waitForStartButton() { delay(1000); Serial.println("Start Pressed"); }
 
 // === Main Drink Sequence ===
 void runDrinkSequence() {
-  Serial.println("Starting Drink Sequence");
+  if (digitalRead(TRIGGER_PIN) == HIGH) {
+    Serial.println("Trigger received from external Arduino");
 
-  stepperX.setMaxSpeed(1000);
-  stepperX.setAcceleration(1000);
-  stepperX.moveTo(-350);
-  stepperX.runToPosition();
-  Serial.println("X moved over cup");
+    // Optional: Wait until signal goes low to avoid re-triggering
+    while (digitalRead(TRIGGER_PIN) == HIGH) {
+      delay(10);
+    }
 
-  stepperY.moveTo(400);
-  stepperY.runToPosition();
-  Serial.println("Y moved to middle");
+    Serial.println("Starting Drink Sequence");
 
-  moveZDown();
+    stepperX.setMaxSpeed(1000);
+    stepperX.setAcceleration(1000);
+    stepperX.moveTo(-350);
+    stepperX.runToPosition();
+    Serial.println("X moved over cup");
 
-  coverServo.write(90);
-  delay(500);
-  Serial.println("Cover Opened");
+    stepperY.moveTo(400);
+    stepperY.runToPosition();
+    Serial.println("Y moved to middle");
 
-  digitalWrite(RELAY_SPINNY_EYES, HIGH);
-  delay(3000);
-  Serial.println("Milk and flavor dispensed");
+    moveZDown();
 
-  coverServo.write(0);
-  delay(500);
-  digitalWrite(RELAY_SPINNY_EYES, LOW);
-  Serial.println("Cover Closed, Spinny Eyes OFF");
+    coverServo.write(90);
+    delay(500);
+    Serial.println("Cover Opened");
 
-  moveZUp();
+    digitalWrite(RELAY_SPINNY_EYES, HIGH);
+    delay(3000);
+    Serial.println("Milk and flavor dispensed");
 
-  stepperX.moveTo(-700);
-  stepperX.runToPosition();
-  Serial.println("X moved to mixer");
+    coverServo.write(0);
+    delay(500);
+    digitalWrite(RELAY_SPINNY_EYES, LOW);
+    Serial.println("Cover Closed, Spinny Eyes OFF");
 
-  moveZDown();
+    moveZUp();
 
-  digitalWrite(RELAY_MIXER, HIGH);
-  digitalWrite(RELAY_SPINNY_EYES, HIGH);
-  delay(3000);
-  digitalWrite(RELAY_MIXER, LOW);
-  digitalWrite(RELAY_SPINNY_EYES, LOW);
-  Serial.println("Mixed drink");
+    stepperX.moveTo(-700);
+    stepperX.runToPosition();
+    Serial.println("X moved to mixer");
 
-  moveZUp();
+    moveZDown();
 
-  stepperY.moveTo(0);
-  stepperY.runToPosition();
-  Serial.println("Y moved home");
+    digitalWrite(RELAY_MIXER, HIGH);
+    digitalWrite(RELAY_SPINNY_EYES, HIGH);
+    delay(3000);
+    digitalWrite(RELAY_MIXER, LOW);
+    digitalWrite(RELAY_SPINNY_EYES, LOW);
+    Serial.println("Mixed drink");
 
-  // === NEW: Stepper3 Spins to Dispense Boba ===
-  Serial.println("Dispensing Boba...");
-  stepper3.moveTo(STEPS_PER_REV);  // One full rotation
-  stepper3.runToPosition();
-  delay(500);
-  stepper3.moveTo(0);              // Return
-  stepper3.runToPosition();
-  delay(500);
+    moveZUp();
 
-  digitalWrite(RELAY_BOBA_SHAKER, HIGH);
-  delay(2000);
-  digitalWrite(RELAY_BOBA_SHAKER, LOW);
-  Serial.println("Boba Shaker Activated");
+    stepperY.moveTo(0);
+    stepperY.runToPosition();
+    Serial.println("Y moved home");
 
-  stepperY.moveTo(800);
-  stepperY.runToPosition();
-  Serial.println("Y moved to front");
+    Serial.println("Dispensing Boba...");
+    stepper3.moveTo(STEPS_PER_REV);
+    stepper3.runToPosition();
+    delay(500);
+    stepper3.moveTo(0);
+    stepper3.runToPosition();
+    delay(500);
 
-  delay(10000);
+    digitalWrite(RELAY_BOBA_SHAKER, HIGH);
+    delay(2000);
+    digitalWrite(RELAY_BOBA_SHAKER, LOW);
+    Serial.println("Boba Shaker Activated");
 
-  homeAllMotors();
+    stepperY.moveTo(800);
+    stepperY.runToPosition();
+    Serial.println("Y moved to front");
+
+    delay(10000);
+
+    homeAllMotors();
+  }
 }
 
 // === Z Movement Helpers ===
