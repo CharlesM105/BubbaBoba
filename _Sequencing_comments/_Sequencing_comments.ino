@@ -61,6 +61,7 @@ void loop() {
 
 // === HOMING ===
 void homeAllMotors() {
+  delay(3000);
   Serial.println("Fast homing X...");
   stepperX.setSpeed(500);
   while (digitalRead(LIMIT_X) != HIGH) {
@@ -85,33 +86,23 @@ void homeAllMotors() {
   stepperZ.setCurrentPosition(0);
   Serial.println("Z homed");
 
-  delay(10);
-}
+  delay(100);
 
-// === Z Axis Control ===
-void moveZDown() {
-  stepperZ.moveTo(-500);
-  stepperZ.runToPosition();
-  Serial.println("Z lowered");
-  delay(1000);
-}
-
-void moveZUp() {
-  stepperZ.moveTo(0);
-  stepperZ.runToPosition();
-  Serial.println("Z raised");
-  delay(1000);
 }
 
 // === Full Drink Routine ===
 void runFullSequence() {
   homeAllMotors();
 
-  // Y slides out
-  stepperY.moveTo(800);
+  stepperZ.setMaxSpeed(1000);  
+  stepperZ.setAcceleration(500);   
+
+      // Y slides out
+  stepperY.moveTo(1000);
   stepperY.runToPosition();
   Serial.println("Y extended for cup");
-  delay(1000);
+
+delay(3000);
 
   // Y slides in
   stepperY.moveTo(400);
@@ -119,23 +110,41 @@ void runFullSequence() {
   Serial.println("Y pulled cup in");
   delay(1000);
 
-  // Z lowers
-  moveZDown();
-
-  // Z raises
-  moveZUp();
-
-  // X moves to mixer
-  stepperX.moveTo(-350);
+   // X moves to tubes
+  stepperX.moveTo(-300);
   stepperX.runToPosition();
   Serial.println("X moved to mixer");
   delay(1000);
 
-  // Z lowers to mix
-  moveZDown();
+  // Z lowers
+  stepperZ.moveTo(2000);
+  stepperZ.runToPosition();
+  Serial.println("Z lowered");
 
-  // Z raises again
-  moveZUp();
+  delay(2000);  
+
+  // Z raises
+  stepperZ.moveTo(-1000);
+  stepperZ.runToPosition();
+  Serial.println("Z raised");
+
+     // X moves to mixer
+  stepperX.moveTo(-400);
+  stepperX.runToPosition();
+  Serial.println("X moved to mixer");
+  delay(1000);
+
+  // Z lowers
+  stepperZ.moveTo(1000);
+  stepperZ.runToPosition();
+  Serial.println("Z lowered");
+
+  delay(2000);
+
+  // Z raises
+  stepperZ.moveTo(-1000);
+  stepperZ.runToPosition();
+  Serial.println("Z raised");
 
   // Y returns to boba
   stepperY.moveTo(0);
@@ -145,18 +154,16 @@ void runFullSequence() {
 
   // Boba spin
   Serial.println("Dispensing boba...");
-  stepper3.moveTo(STEPS_PER_REV);
+  stepper3.moveTo(200);
   stepper3.runToPosition();
-  delay(1000);
-  stepper3.moveTo(0);
-  stepper3.runToPosition();
+  stepper3.setCurrentPosition(0);
   delay(1000);
 
   // Y slides forward to deliver
-  stepperY.moveTo(800);
+  stepperY.moveTo(900);
   stepperY.runToPosition();
   Serial.println("Y fully extended to present cup");
-  delay(1000);
+  delay(10000);
 
   Serial.println("Resetting...");
   homeAllMotors();

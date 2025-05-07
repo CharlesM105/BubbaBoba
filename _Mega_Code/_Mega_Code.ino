@@ -18,7 +18,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 // === LEDs ===
 #define LED_STRIP_PIN 30
-#define NUMPIXELS 200
+#define NUMPIXELS 40
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 // === Rotary Encoder ===
@@ -35,6 +35,8 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define RELAY_FLAVOR_1 3
 #define RELAY_FLAVOR_2 4
 #define RELAY_FLAVOR_3 5
+
+#define UNO_CONNECTION A0; 
 
 // === Servo ===
 Servo servo_A2;
@@ -61,6 +63,8 @@ int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600);
+
+  spinGoldLEDs(3000);
 
   lcd.init();
   lcd.backlight();
@@ -131,13 +135,14 @@ void loop() {
       Serial.println("Sent DISPENSE signal through A0");
     }
   }
+  spinGoldLEDs(3000);
 }
 
 void performHoming() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Homing in progress");
-  for (int i = 10; i > 0; i--) {
+  for (int i = 2; i > 0; i--) {
     lcd.setCursor(0, 1);
     lcd.print("Wait ");
     lcd.print(i);
@@ -273,6 +278,29 @@ void selectMenuItem() {
   }
 
   menuIndex = -1;
+}
+
+void spinGoldLEDs(int durationMillis) {
+  unsigned long startTime = millis();
+  int pixelCount = pixels.numPixels();
+  int position = 0;
+
+  while (millis() - startTime < durationMillis) {
+    pixels.clear();
+
+    // Turn on a group of 3 gold-colored pixels in a rotating pattern
+    for (int i = 0; i < 5; i++) {
+      int index = (position + i) % pixelCount;
+      pixels.setPixelColor(index, pixels.Color(255, 215, 0)); // Gold color
+    }
+
+    pixels.show();
+    delay(60); // Controls speed of the spin
+    position = (position + 1) % pixelCount;
+  }
+
+  pixels.clear();
+  pixels.show();
 }
 
 void makeDrink(String drinkName) {
