@@ -13,19 +13,19 @@
   <div class="section">
     <h2>✨ Project Overview</h2>
     <p>
-      The Yummy Boba Machine is an interactive, Arduino Mega–based drink-making system designed to serve custom boba drinks using an LCD interface, stepper motors, relays, servos, RFID access, and LED lighting. The machine is designed to be <strong>modular</strong>, <strong>programmable</strong>, and <strong>deliciously efficient</strong>.
+      The Yummy Boba Machine is an interactive, Arduino Mega–based drink-making system designed to serve custom boba drinks using an LCD interface, stepper motors, relays, servos, rotary encoders, and LED lighting. The machine is designed to be <strong>modular</strong>, <strong>programmable</strong>, and <strong>deliciously efficient</strong>.
     </p>
   </div>
 
   <div class="section">
     <h2>🧠 How It Works</h2>
     <p>
-      When powered on, the user interacts with a rotary encoder to navigate the LCD menu. A valid RFID tag unlocks drink options. Once selected:
+      When powered on, the user interacts with a rotary encoder to navigate the LCD menu. Once selected:
     </p>
     <ol>
-      <li>A servo drops a cup into place.</li>
-      <li>NeoPixel LEDs light up the scene.</li>
-      <li>Stepper motors and relays dispense ingredients.</li>
+      <li>Stepper motors move into position.</li>
+      <li>Relays control pumps that dispense the selected drink.</li>
+            <li>Drink is mixed and boba is dispensed.</li>
       <li>The user receives a fresh boba drink.</li>
     </ol>
   </div>
@@ -34,7 +34,6 @@
     <h2>🧰 Features</h2>
     <ul>
       <li>20x4 I2C LCD with menu navigation</li>
-      <li>RFID tag access</li>
       <li>Rotary encoder input</li>
       <li>Stepper motors with gantry plate system</li>
       <li>Relay-controlled pumps</li>
@@ -98,7 +97,7 @@
   <div class="section">
     <h2>🙌 Credits</h2>
     <p>
-      Project by <strong>Charlie</strong><br />
+      Project by <strong>Charlie, Sabrina, and Vincent</strong><br />
       Built with a love for boba tea and tech.
     </p>
   </div>
