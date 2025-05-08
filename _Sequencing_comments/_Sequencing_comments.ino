@@ -87,7 +87,6 @@ void homeAllMotors() {
   Serial.println("Z homed");
 
   delay(100);
-
 }
 
 // === Full Drink Routine ===
@@ -95,27 +94,26 @@ void runFullSequence() {
   homeAllMotors();
 
   stepperZ.setMaxSpeed(1000);  
-  stepperZ.setAcceleration(500);   
+  stepperZ.setAcceleration(1000);   
 
-      // Y slides out
-  stepperY.moveTo(1000);
+  // Y slides out
+  stepperY.moveTo(1100);
   stepperY.runToPosition();
   Serial.println("Y extended for cup");
 
-delay(3000);
+  // Wait for signal from A0
+  waitForSignal();
 
   // Y slides in
-  stepperY.moveTo(400);
+  stepperY.moveTo(520);
   stepperY.runToPosition();
   Serial.println("Y pulled cup in");
-  delay(1000);
-
-   // X moves to tubes
-  stepperX.moveTo(-300);
+  
+  // X moves to tubes
+  stepperX.moveTo(-260);
   stepperX.runToPosition();
   Serial.println("X moved to mixer");
-  delay(1000);
-
+  
   // Z lowers
   stepperZ.moveTo(2000);
   stepperZ.runToPosition();
@@ -124,33 +122,40 @@ delay(3000);
   delay(2000);  
 
   // Z raises
-  stepperZ.moveTo(-1000);
-  stepperZ.runToPosition();
-  Serial.println("Z raised");
+  stepperZ.setSpeed(-500);
+  while (digitalRead(LIMIT_Z) != HIGH) {
+    stepperZ.runSpeed();
+  }
 
-     // X moves to mixer
-  stepperX.moveTo(-400);
+  // X moves to mixer
+  stepperX.moveTo(-670);
   stepperX.runToPosition();
   Serial.println("X moved to mixer");
-  delay(1000);
-
+  
   // Z lowers
-  stepperZ.moveTo(1000);
+  stepperZ.moveTo(2000);
   stepperZ.runToPosition();
   Serial.println("Z lowered");
 
-  delay(2000);
+  delay(2000);  // mix
 
   // Z raises
-  stepperZ.moveTo(-1000);
-  stepperZ.runToPosition();
-  Serial.println("Z raised");
+  stepperZ.setSpeed(-500);
+  while (digitalRead(LIMIT_Z) != HIGH) {
+    stepperZ.runSpeed();
+  }
+
+  // X returns
+  stepperX.setSpeed(500);
+  while (digitalRead(LIMIT_X) != HIGH) {
+    stepperX.runSpeed();
+  }
 
   // Y returns to boba
-  stepperY.moveTo(0);
-  stepperY.runToPosition();
-  Serial.println("Y returned for boba");
-  delay(1000);
+  stepperY.setSpeed(-500);
+  while (digitalRead(LIMIT_Y) != HIGH) {
+    stepperY.runSpeed();
+  }
 
   // Boba spin
   Serial.println("Dispensing boba...");
@@ -160,11 +165,20 @@ delay(3000);
   delay(1000);
 
   // Y slides forward to deliver
-  stepperY.moveTo(900);
+  stepperY.moveTo(1100);
   stepperY.runToPosition();
   Serial.println("Y fully extended to present cup");
+  
   delay(10000);
 
   Serial.println("Resetting...");
   homeAllMotors();
+}
+
+// Function to wait for a digital read from pin A0 that is HIGH (>= 1)
+void waitForSignal() {
+  while (digitalRead(A0) == LOW) {
+    delay(10);  // Small delay to avoid locking up the program
+  }
+  Serial.println("Received signal from A0, proceeding...");
 }
