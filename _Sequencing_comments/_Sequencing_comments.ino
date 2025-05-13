@@ -119,7 +119,7 @@ void runFullSequence() {
 
   // Move servo to 45 degrees
   coverServo.write(45);
-  delay(2000);
+  delay(5000);                                 //pump da flavor
   coverServo.write(0);  // Back to 0
 
   // Z raises
@@ -140,7 +140,7 @@ void runFullSequence() {
 
   // Turn on mixer
   digitalWrite(RELAY_MIXER, HIGH);
-  delay(2000);  // mixing time
+  delay(4000);                                 // mixing time
   digitalWrite(RELAY_MIXER, LOW);
 
   // Z raises
@@ -161,16 +161,13 @@ void runFullSequence() {
     stepperY.runSpeed();
   }
 
-  // Shake boba
-  digitalWrite(RELAY_BOBA_SHAKER, HIGH);
-  delay(1000);
-  digitalWrite(RELAY_BOBA_SHAKER, LOW);
-
   // Dispense boba
   Serial.println("Dispensing boba...");
+      digitalWrite(RELAY_BOBA_SHAKER, HIGH);  //shaky
   stepper3.moveTo(200);
   stepper3.runToPosition();
   stepper3.setCurrentPosition(0);
+      digitalWrite(RELAY_BOBA_SHAKER, LOW);   //no shaky
   delay(1000);
 
   // Present cup
@@ -178,7 +175,7 @@ void runFullSequence() {
   stepperY.runToPosition();
   Serial.println("Y fully extended to present cup");
   
-  delay(10000);
+  delay(10000);       //wait for customer to pick up cup
 
   Serial.println("Resetting...");
   homeAllMotors();
