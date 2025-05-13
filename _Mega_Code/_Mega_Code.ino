@@ -1,20 +1,12 @@
-#include <Servo.h>
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
-#include <MFRC522.h>
 #include <Adafruit_NeoPixel.h>
-#include <avr/wdt.h>
 
 // === LCD ===
 #define I2C_ADDR 0x27
 #define LCD_COLUMNS 20
 #define LCD_LINES 4
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
-
-// === RFID ===
-#define SS_PIN 10
-#define RST_PIN 9
-MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 // === LEDs ===
 #define LED_STRIP_PIN 30
@@ -25,28 +17,19 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define ENCODER_CLK 49
 #define ENCODER_DT 51
 #define ENCODER_SW 53
-#define RESET_BUTTON_PIN 6
 
 // === Relays ===
-#define RELAY_SPINNY_EYES 2
-#define RELAY_MIXER 3
-#define RELAY_BOBA_SHAKER 4
 #define RELAY_MILK 2
 #define RELAY_FLAVOR_1 3
 #define RELAY_FLAVOR_2 4
 #define RELAY_FLAVOR_3 5
 
-#define UNO_CONNECTION A0; 
+#define UNO_CONNECTION A0
 
-// === Servo ===
-Servo servo_A2;
-
-// === Ratios and Colors ===
 int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
 int redColor = 0, greenColor = 0, blueColor = 0;
 int currentBrightness = 51;
 
-// === Encoder and Menu ===
 int lastStateCLK;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
@@ -54,10 +37,10 @@ unsigned long lastButtonPress = 0;
 unsigned long lastEncoderMove = 0;
 const unsigned long encoderDebounce = 100;
 
-String drinkMenu[] = {"Brown Sugar Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
+String drinkMenu[] = {"Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
 int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 
-String controlMenu[] = {"Run Diagnostics", "RFID Access", "Servo Trigger", "Manual Axis Ctrl", "LED Settings", "Reset System"};
+String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings"};
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
 void setup() {
@@ -75,15 +58,14 @@ void setup() {
   pinMode(ENCODER_CLK, INPUT);
   pinMode(ENCODER_DT, INPUT);
   pinMode(ENCODER_SW, INPUT_PULLUP);
-  pinMode(RESET_BUTTON_PIN, INPUT_PULLUP);
 
   pinMode(RELAY_FLAVOR_1, OUTPUT);
   pinMode(RELAY_FLAVOR_2, OUTPUT);
   pinMode(RELAY_FLAVOR_3, OUTPUT);
   pinMode(RELAY_MILK, OUTPUT);
 
-  pinMode(A0, OUTPUT);          // A0 used to trigger Uno
-  digitalWrite(A0, LOW);        // Ensure it starts LOW
+  pinMode(A0, OUTPUT);
+  digitalWrite(A0, LOW);
 
   digitalWrite(RELAY_FLAVOR_1, LOW);
   digitalWrite(RELAY_FLAVOR_2, LOW);
@@ -91,14 +73,6 @@ void setup() {
   digitalWrite(RELAY_MILK, LOW);
 
   lastStateCLK = digitalRead(ENCODER_CLK);
-
-  SPI.begin();
-  mfrc522.PCD_Init();
-
-  servo_A2.attach(A2, 500, 2500);
-  servo_A2.write(0);
-  delay(500);
-  servo_A2.detach();
 
   pixels.begin();
   pixels.setBrightness(currentBrightness);
@@ -117,24 +91,6 @@ void loop() {
     selectMenuItem();
   }
 
-  if (digitalRead(RESET_BUTTON_PIN) == LOW) {
-    lcd.clear();
-    lcd.print("System Reset...");
-    delay(1000);
-    wdt_enable(WDTO_15MS);
-    while (1) {}
-  }
-
-  if (Serial.available()) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
-    if (command == "dispense") {
-      digitalWrite(A0, HIGH);
-      delay(100);
-      digitalWrite(A0, LOW);
-      Serial.println("Sent DISPENSE signal through A0");
-    }
-  }
   spinGoldLEDs(3000);
 }
 
@@ -236,45 +192,22 @@ void selectMenuItem() {
       makeDrink(selection);
     }
   } else {
-    if (selection == "Reset System") {
-      lcd.clear();
-      lcd.print("Resetting...");
-      delay(1000);
-      wdt_enable(WDTO_15MS);
-      while (1) {}
-    } else if (selection == "RFID Access") {
-      lcd.clear();
-      lcd.print("Scan your card...");
-      delay(2000);
-    } else if (selection == "Servo Trigger") {
-      servo_A2.attach(A2, 500, 2500);
-      servo_A2.write(90);
-      delay(1000);
-      servo_A2.write(0);
-      delay(500);
-      servo_A2.detach();
-    } else if (selection == "LED Settings") {
+    if (selection == "LED Settings") {
       lcd.clear();
       lcd.print("LED Settings TBD");
       delay(1000);
     } else if (selection == "Run Diagnostics") {
       lcd.clear();
       lcd.print("Running tests...");
-      digitalWrite(A0, HIGH);
-      delay(100);
-      digitalWrite(A0, LOW);
-      delay(1000);
     } else if (selection == "Manual Axis Ctrl") {
       lcd.clear();
       lcd.print("Manual Ctrl TBD");
       delay(1000);
     }
 
-    if (selection != "Reset System") {
-      inDrinkMenu = true;
-      menuIndex = 0;
-      menuStartIndex = 0;
-    }
+    inDrinkMenu = true;
+    menuIndex = 0;
+    menuStartIndex = 0;
   }
 
   menuIndex = -1;
@@ -287,15 +220,12 @@ void spinGoldLEDs(int durationMillis) {
 
   while (millis() - startTime < durationMillis) {
     pixels.clear();
-
-    // Turn on a group of 3 gold-colored pixels in a rotating pattern
     for (int i = 0; i < 5; i++) {
       int index = (position + i) % pixelCount;
-      pixels.setPixelColor(index, pixels.Color(255, 215, 0)); // Gold color
+      pixels.setPixelColor(index, pixels.Color(255, 215, 0));
     }
-
     pixels.show();
-    delay(60); // Controls speed of the spin
+    delay(60);
     position = (position + 1) % pixelCount;
   }
 
@@ -305,52 +235,54 @@ void spinGoldLEDs(int durationMillis) {
 
 void makeDrink(String drinkName) {
   lcd.clear();
-  lcd.print("Dispensing:");
+  lcd.print("Making Drink:");
   lcd.setCursor(0, 1);
   lcd.print(drinkName);
   delay(1000);
 
-  if (drinkName == "Brown Sugar Tea") {
-//talk tuah uno
-  digitalWrite(A0, HIGH);
-  delay(100);
-  digitalWrite(A0, LOW);
-  delay(1000);
 
+//drink making commands
+
+  
+  if (drinkName == "Classic Tea") {
+       digitalWrite(A0, HIGH);
+       delay(500);
+       digitalWrite(A0, LOW);
+          delay(5000);                           //change this to however long it takes the machine to position itself
     digitalWrite(RELAY_FLAVOR_1, HIGH);
-    delay(1000);
+    delay(2000);
     digitalWrite(RELAY_FLAVOR_1, LOW);
     digitalWrite(RELAY_MILK, HIGH);
-    delay(1500);
+    delay(2000);
     digitalWrite(RELAY_MILK, LOW);
-
+         delay(5000);                           //change this to however long it takes the machine to position itself
+    
   } else if (drinkName == "Strawberry Milk") {
-    //talk tuah uno
-  digitalWrite(A0, HIGH);
-  delay(100);
-  digitalWrite(A0, LOW);
-  delay(1000);
-
+       digitalWrite(A0, HIGH);
+       delay(500);
+       digitalWrite(A0, LOW);
+          delay(5000);                           //change this to however long it takes the machine to position itself
     digitalWrite(RELAY_FLAVOR_2, HIGH);
-    delay(1000);
+    delay(2000);
     digitalWrite(RELAY_FLAVOR_2, LOW);
     digitalWrite(RELAY_MILK, HIGH);
     delay(2000);
     digitalWrite(RELAY_MILK, LOW);
-
+         delay(5000);                           //change this to however long it takes the machine to position itself
+    
   } else if (drinkName == "Taro Milk Tea") {
-    //talk tuah uno
-  digitalWrite(A0, HIGH);
-  delay(100);
-  digitalWrite(A0, LOW);
-  delay(1000);
-
+       digitalWrite(A0, HIGH);
+       delay(500);
+       digitalWrite(A0, LOW);
+          delay(5000);                           //change this to however long it takes the machine to position itself
     digitalWrite(RELAY_FLAVOR_3, HIGH);
-    delay(1000);
+    delay(2000);
     digitalWrite(RELAY_FLAVOR_3, LOW);
     digitalWrite(RELAY_MILK, HIGH);
-    delay(1800);
+    delay(2000);
     digitalWrite(RELAY_MILK, LOW);
+         delay(5000);                           //change this to however long it takes the machine to position itself
+    
   }
 
   lcd.clear();
