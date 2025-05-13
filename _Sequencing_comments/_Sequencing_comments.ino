@@ -14,24 +14,24 @@ AccelStepper stepper3(AccelStepper::DRIVER, 9, 8); // Boba Dispenser
 #define LIMIT_Y 2
 #define LIMIT_Z 3
 
-// === Relays (optional) ===
-#define RELAY_SPINNY_EYES 5
-#define RELAY_MIXER 6
-#define RELAY_BOBA_SHAKER 7
+// === Relays (Updated Pins) ===
+#define RELAY_MIXER A2
+#define RELAY_BOBA_SHAKER A3
 
 Servo coverServo;
 
 void setup() {
   Serial.begin(9600);
 
-  stepperX.setMaxSpeed(3000);
-  stepperX.setAcceleration(4000);
-  stepperY.setMaxSpeed(3000);
-  stepperY.setAcceleration(1000);
-  stepperZ.setMaxSpeed(3000);       // ← Faster Z
-  stepperZ.setAcceleration(4000);   // ← Faster Z accel
-  stepper3.setMaxSpeed(1000);
-  stepper3.setAcceleration(500);
+  // Slower and smoother speeds
+  stepperX.setMaxSpeed(2000);
+  stepperX.setAcceleration(2000);
+  stepperY.setMaxSpeed(2000);
+  stepperY.setAcceleration(800);
+  stepperZ.setMaxSpeed(2000);
+  stepperZ.setAcceleration(2000);
+  stepper3.setMaxSpeed(800);
+  stepper3.setAcceleration(300);
 
   stepperX.setCurrentPosition(0);
   stepperY.setCurrentPosition(0);
@@ -42,10 +42,8 @@ void setup() {
   pinMode(LIMIT_Y, INPUT_PULLUP);
   pinMode(LIMIT_Z, INPUT_PULLUP);
 
-  pinMode(RELAY_SPINNY_EYES, OUTPUT);
   pinMode(RELAY_MIXER, OUTPUT);
   pinMode(RELAY_BOBA_SHAKER, OUTPUT);
-  digitalWrite(RELAY_SPINNY_EYES, LOW);
   digitalWrite(RELAY_MIXER, LOW);
   digitalWrite(RELAY_BOBA_SHAKER, LOW);
 
@@ -63,7 +61,7 @@ void loop() {
 void homeAllMotors() {
   delay(3000);
   Serial.println("Fast homing X...");
-  stepperX.setSpeed(500);
+  stepperX.setSpeed(400);
   while (digitalRead(LIMIT_X) != HIGH) {
     stepperX.runSpeed();
   }
@@ -71,7 +69,7 @@ void homeAllMotors() {
   Serial.println("X homed");
 
   Serial.println("Fast homing Y...");
-  stepperY.setSpeed(-500);
+  stepperY.setSpeed(-400);
   while (digitalRead(LIMIT_Y) != HIGH) {
     stepperY.runSpeed();
   }
@@ -79,7 +77,7 @@ void homeAllMotors() {
   Serial.println("Y homed");
 
   Serial.println("Fast homing Z...");
-  stepperZ.setSpeed(-500);
+  stepperZ.setSpeed(-400);
   while (digitalRead(LIMIT_Z) != HIGH) {
     stepperZ.runSpeed();
   }
@@ -112,17 +110,20 @@ void runFullSequence() {
   // X moves to tubes
   stepperX.moveTo(-260);
   stepperX.runToPosition();
-  Serial.println("X moved to mixer");
+  Serial.println("X moved to tubes");
   
   // Z lowers
   stepperZ.moveTo(2000);
   stepperZ.runToPosition();
   Serial.println("Z lowered");
 
-  delay(2000);  
+  // Move servo to 45 degrees
+  coverServo.write(45);
+  delay(2000);
+  coverServo.write(0);  // Back to 0
 
   // Z raises
-  stepperZ.setSpeed(-500);
+  stepperZ.setSpeed(-400);
   while (digitalRead(LIMIT_Z) != HIGH) {
     stepperZ.runSpeed();
   }
@@ -137,34 +138,42 @@ void runFullSequence() {
   stepperZ.runToPosition();
   Serial.println("Z lowered");
 
-  delay(2000);  // mix
+  // Turn on mixer
+  digitalWrite(RELAY_MIXER, HIGH);
+  delay(2000);  // mixing time
+  digitalWrite(RELAY_MIXER, LOW);
 
   // Z raises
-  stepperZ.setSpeed(-500);
+  stepperZ.setSpeed(-400);
   while (digitalRead(LIMIT_Z) != HIGH) {
     stepperZ.runSpeed();
   }
 
-  // X returns
-  stepperX.setSpeed(500);
+  // X returns home
+  stepperX.setSpeed(400);
   while (digitalRead(LIMIT_X) != HIGH) {
     stepperX.runSpeed();
   }
 
   // Y returns to boba
-  stepperY.setSpeed(-500);
+  stepperY.setSpeed(-400);
   while (digitalRead(LIMIT_Y) != HIGH) {
     stepperY.runSpeed();
   }
 
-  // Boba spin
+  // Shake boba
+  digitalWrite(RELAY_BOBA_SHAKER, HIGH);
+  delay(1000);
+  digitalWrite(RELAY_BOBA_SHAKER, LOW);
+
+  // Dispense boba
   Serial.println("Dispensing boba...");
   stepper3.moveTo(200);
   stepper3.runToPosition();
   stepper3.setCurrentPosition(0);
   delay(1000);
 
-  // Y slides forward to deliver
+  // Present cup
   stepperY.moveTo(1100);
   stepperY.runToPosition();
   Serial.println("Y fully extended to present cup");
@@ -175,10 +184,10 @@ void runFullSequence() {
   homeAllMotors();
 }
 
-// Function to wait for a digital read from pin A0 that is HIGH (>= 1)
+// === Wait for Signal on A0 ===
 void waitForSignal() {
   while (digitalRead(A0) == LOW) {
-    delay(10);  // Small delay to avoid locking up the program
+    delay(10);
   }
   Serial.println("Received signal from A0, proceeding...");
 }
