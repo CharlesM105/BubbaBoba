@@ -99,7 +99,7 @@ void runFullSequence() {
   stepperY.runToPosition();
   Serial.println("Y extended for cup");
 
-  // Wait for signal from A0
+  // Wait for photoresistor signal (light)
   waitForSignal();
 
   // Y slides in
@@ -119,7 +119,7 @@ void runFullSequence() {
 
   // Move servo to 45 degrees
   coverServo.write(45);
-  delay(5000);                                 //pump da flavor
+  delay(5000);  // Dispensing flavor
   coverServo.write(0);  // Back to 0
 
   // Z raises
@@ -140,7 +140,7 @@ void runFullSequence() {
 
   // Turn on mixer
   digitalWrite(RELAY_MIXER, HIGH);
-  delay(4000);                                 // mixing time
+  delay(4000);  // mixing time
   digitalWrite(RELAY_MIXER, LOW);
 
   // Z raises
@@ -155,7 +155,7 @@ void runFullSequence() {
     stepperX.runSpeed();
   }
 
-  // Y returns to boba
+  // Y returns to boba position
   stepperY.setSpeed(-400);
   while (digitalRead(LIMIT_Y) != HIGH) {
     stepperY.runSpeed();
@@ -163,28 +163,39 @@ void runFullSequence() {
 
   // Dispense boba
   Serial.println("Dispensing boba...");
-      digitalWrite(RELAY_BOBA_SHAKER, HIGH);  //shaky
+  digitalWrite(RELAY_BOBA_SHAKER, HIGH);  // Start shaking
   stepper3.moveTo(200);
   stepper3.runToPosition();
   stepper3.setCurrentPosition(0);
-      digitalWrite(RELAY_BOBA_SHAKER, LOW);   //no shaky
+  digitalWrite(RELAY_BOBA_SHAKER, LOW);   // Stop shaking
   delay(1000);
 
   // Present cup
   stepperY.moveTo(1100);
   stepperY.runToPosition();
   Serial.println("Y fully extended to present cup");
-  
-  delay(10000);       //wait for customer to pick up cup
+
+  delay(10000); // Wait for customer to pick up cup
 
   Serial.println("Resetting...");
   homeAllMotors();
 }
 
-// === Wait for Signal on A0 ===
+// === Wait for Signal from Photoresistor on A0 ===
 void waitForSignal() {
-  while (digitalRead(A0) == LOW) {
-    delay(10);
+  int lightThreshold = 700; // Adjust based on your lighting and photoresistor setup
+
+  Serial.println("Waiting for light signal from photoresistor...");
+
+  while (true) {
+    int lightLevel = analogRead(A0);
+    if (lightLevel > lightThreshold) {
+      Serial.print("Light detected! Value: ");
+      Serial.println(lightLevel);
+      break;
+    }
+    delay(50);
   }
-  Serial.println("Received signal from A0, proceeding...");
+
+  Serial.println("Light signal confirmed, continuing...");
 }
