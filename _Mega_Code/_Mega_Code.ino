@@ -14,15 +14,15 @@ LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 // === Rotary Encoder ===
-#define ENCODER_CLK 49
-#define ENCODER_DT 51
-#define ENCODER_SW 53
+#define ENCODER_CLK 18   // Moved off relay conflict pins
+#define ENCODER_DT 19
+#define ENCODER_SW 20
 
-// === Relays ===
-#define RELAY_MILK 2
-#define RELAY_FLAVOR_1 3
-#define RELAY_FLAVOR_2 4
-#define RELAY_FLAVOR_3 5
+// === Relays === (Moved to avoid pin conflict)
+#define RELAY_MILK 5
+#define RELAY_FLAVOR_1 6
+#define RELAY_FLAVOR_2 7
+#define RELAY_FLAVOR_3 8
 
 #define UNO_CONNECTION A0
 
@@ -30,12 +30,11 @@ int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
 int redColor = 0, greenColor = 0, blueColor = 0;
 int currentBrightness = 51;
 
-int lastStateCLK;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
 unsigned long lastButtonPress = 0;
-unsigned long lastEncoderMove = 0;
 const unsigned long encoderDebounce = 100;
+unsigned long startupIgnoreTime = 0;
 
 String drinkMenu[] = {"Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
 int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
@@ -46,6 +45,9 @@ int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600);
+  Serial.println("Encoder Test Start");
+
+  startupIgnoreTime = millis();  // Track startup time to block initial button
 
   spinGoldLEDs(3000);
 
@@ -55,8 +57,8 @@ void setup() {
   lcd.print("YUMMY BOBA BOT");
   delay(1500);
 
-  pinMode(ENCODER_CLK, INPUT);
-  pinMode(ENCODER_DT, INPUT);
+  pinMode(ENCODER_CLK, INPUT_PULLUP);
+  pinMode(ENCODER_DT, INPUT_PULLUP);
   pinMode(ENCODER_SW, INPUT_PULLUP);
 
   pinMode(RELAY_FLAVOR_1, OUTPUT);
@@ -72,8 +74,6 @@ void setup() {
   digitalWrite(RELAY_FLAVOR_3, LOW);
   digitalWrite(RELAY_MILK, LOW);
 
-  lastStateCLK = digitalRead(ENCODER_CLK);
-
   pixels.begin();
   pixels.setBrightness(currentBrightness);
   pixels.clear();
@@ -86,10 +86,22 @@ void setup() {
 void loop() {
   handleRotaryEncoder();
 
-  if (digitalRead(ENCODER_SW) == LOW && (millis() - lastButtonPress > 250)) {
-    lastButtonPress = millis();
-    selectMenuItem();
+  // === Button debounce with startup lock ===
+  static bool lastButtonState = HIGH;
+  bool buttonState = digitalRead(ENCODER_SW);
+
+  if (millis() - startupIgnoreTime >= 3000) {
+    if (buttonState != lastButtonState) {
+      delay(10);  // debounce
+      buttonState = digitalRead(ENCODER_SW);
+      if (buttonState == LOW && lastButtonState == HIGH) {
+        lastButtonPress = millis();
+        selectMenuItem();
+      }
+    }
   }
+
+  lastButtonState = buttonState;
 
   spinGoldLEDs(3000);
 }
@@ -98,7 +110,7 @@ void performHoming() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Homing in progress");
-  for (int i = 2; i > 0; i--) {
+  for (int i = 1; i > 0; i--) {
     lcd.setCursor(0, 1);
     lcd.print("Wait ");
     lcd.print(i);
@@ -112,28 +124,33 @@ void performHoming() {
 }
 
 void handleRotaryEncoder() {
-  if (millis() - lastEncoderMove < encoderDebounce) return;
+  static int lastClkState = HIGH;
+  static unsigned long lastTurnTime = 0;
 
-  int currentStateCLK = digitalRead(ENCODER_CLK);
-  int currentStateDT = digitalRead(ENCODER_DT);
+  int clkState = digitalRead(ENCODER_CLK);
+  int dtState = digitalRead(ENCODER_DT);
 
-  if (currentStateCLK != lastStateCLK && currentStateCLK == HIGH) {
-    lastEncoderMove = millis();
-    int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+  if (clkState != lastClkState && clkState == LOW) {
+    if (millis() - lastTurnTime > encoderDebounce) {
+      int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
 
-    if (currentStateDT == LOW) {
-      menuIndex++;
-    } else {
-      menuIndex--;
+      if (dtState == HIGH) {
+        menuIndex++;
+        Serial.println("Rotated Clockwise");
+      } else {
+        menuIndex--;
+        Serial.println("Rotated CounterClockwise");
+      }
+
+      if (menuIndex < 0) menuIndex = menuSize - 1;
+      if (menuIndex >= menuSize) menuIndex = 0;
+
+      showDrinkMenu();
+      lastTurnTime = millis();
     }
-
-    if (menuIndex < 0) menuIndex = menuSize - 1;
-    if (menuIndex >= menuSize) menuIndex = 0;
-
-    showDrinkMenu();
   }
 
-  lastStateCLK = currentStateCLK;
+  lastClkState = clkState;
 }
 
 void showDrinkMenu() {
@@ -240,49 +257,44 @@ void makeDrink(String drinkName) {
   lcd.print(drinkName);
   delay(1000);
 
-
-//drink making commands
-
-  
   if (drinkName == "Classic Tea") {
-       digitalWrite(A0, HIGH);
-       delay(500);
-       digitalWrite(A0, LOW);
-          delay(5000);                           //change this to however long it takes the machine to position itself
+    digitalWrite(A0, HIGH);
+    delay(500);
+    digitalWrite(A0, LOW);
+    delay(5000);
     digitalWrite(RELAY_FLAVOR_1, HIGH);
     delay(2000);
     digitalWrite(RELAY_FLAVOR_1, LOW);
     digitalWrite(RELAY_MILK, HIGH);
     delay(2000);
     digitalWrite(RELAY_MILK, LOW);
-         delay(5000);                           //change this to however long it takes the machine to position itself
-    
+    delay(5000);
+
   } else if (drinkName == "Strawberry Milk") {
-       digitalWrite(A0, HIGH);
-       delay(500);
-       digitalWrite(A0, LOW);
-          delay(5000);                           //change this to however long it takes the machine to position itself
+    digitalWrite(A0, HIGH);
+    delay(500);
+    digitalWrite(A0, LOW);
+    delay(5000);
     digitalWrite(RELAY_FLAVOR_2, HIGH);
     delay(2000);
     digitalWrite(RELAY_FLAVOR_2, LOW);
     digitalWrite(RELAY_MILK, HIGH);
     delay(2000);
     digitalWrite(RELAY_MILK, LOW);
-         delay(5000);                           //change this to however long it takes the machine to position itself
-    
+    delay(5000);
+
   } else if (drinkName == "Taro Milk Tea") {
-       digitalWrite(A0, HIGH);
-       delay(500);
-       digitalWrite(A0, LOW);
-          delay(5000);                           //change this to however long it takes the machine to position itself
+    digitalWrite(A0, HIGH);
+    delay(500);
+    digitalWrite(A0, LOW);
+    delay(5000);
     digitalWrite(RELAY_FLAVOR_3, HIGH);
     delay(2000);
     digitalWrite(RELAY_FLAVOR_3, LOW);
     digitalWrite(RELAY_MILK, HIGH);
     delay(2000);
     digitalWrite(RELAY_MILK, LOW);
-         delay(5000);                           //change this to however long it takes the machine to position itself
-    
+    delay(5000);
   }
 
   lcd.clear();
