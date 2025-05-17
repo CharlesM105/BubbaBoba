@@ -183,7 +183,7 @@ void runFullSequence() {
 
 // === Wait for Signal from Photoresistor on A0 ===
 void waitForSignal() {
-  int lightThreshold = 700; // Adjust based on your lighting and photoresistor setup
+  int lightThreshold = 35; // Adjust based on your lighting and photoresistor setup
 
   Serial.println("Waiting for light signal from photoresistor...");
 
