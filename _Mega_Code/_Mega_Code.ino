@@ -14,11 +14,11 @@ LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 // === Rotary Encoder ===
-#define ENCODER_CLK 18   // Moved off relay conflict pins
+#define ENCODER_CLK 18
 #define ENCODER_DT 19
-#define ENCODER_SW 20
+#define ENCODER_SW 21  // WORKING PIN
 
-// === Relays === (Moved to avoid pin conflict)
+// === Relays ===
 #define RELAY_MILK 5
 #define RELAY_FLAVOR_1 6
 #define RELAY_FLAVOR_2 7
@@ -32,8 +32,6 @@ int currentBrightness = 51;
 
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
-unsigned long lastButtonPress = 0;
-const unsigned long encoderDebounce = 100;
 unsigned long startupIgnoreTime = 0;
 
 String drinkMenu[] = {"Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
@@ -42,20 +40,22 @@ int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings"};
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
+// === BUTTON STATE TRACKING ===
+bool lastButtonState = HIGH;
+unsigned long buttonDebounceTime = 0;
+const unsigned long debounceDelay = 50;
+
+// === DRINK-MAKING STATE ===
+bool makingDrink = false;
+unsigned long drinkStartTime = 0;
+int drinkStep = 0;
+String currentDrink = "";
+
 void setup() {
   Serial.begin(9600);
   Serial1.begin(9600);
-  Serial.println("Encoder Test Start");
 
-  startupIgnoreTime = millis();  // Track startup time to block initial button
-
-  spinGoldLEDs(3000);
-
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(3, 1);
-  lcd.print("YUMMY BOBA BOT");
-  delay(1500);
+  startupIgnoreTime = millis();
 
   pinMode(ENCODER_CLK, INPUT_PULLUP);
   pinMode(ENCODER_DT, INPUT_PULLUP);
@@ -65,14 +65,19 @@ void setup() {
   pinMode(RELAY_FLAVOR_2, OUTPUT);
   pinMode(RELAY_FLAVOR_3, OUTPUT);
   pinMode(RELAY_MILK, OUTPUT);
-
   pinMode(A0, OUTPUT);
-  digitalWrite(A0, LOW);
 
   digitalWrite(RELAY_FLAVOR_1, LOW);
   digitalWrite(RELAY_FLAVOR_2, LOW);
   digitalWrite(RELAY_FLAVOR_3, LOW);
   digitalWrite(RELAY_MILK, LOW);
+  digitalWrite(A0, LOW);
+
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(3, 1);
+  lcd.print("YUMMY BOBA BOT");
+  delay(1500);
 
   pixels.begin();
   pixels.setBrightness(currentBrightness);
@@ -85,61 +90,45 @@ void setup() {
 
 void loop() {
   handleRotaryEncoder();
+  handleButton();
+  handleDrinkMaking();
+}
 
-  // === Button debounce with startup lock ===
-  static bool lastButtonState = HIGH;
+void handleButton() {
   bool buttonState = digitalRead(ENCODER_SW);
 
-  if (millis() - startupIgnoreTime >= 3000) {
-    if (buttonState != lastButtonState) {
-      delay(10);  // debounce
-      buttonState = digitalRead(ENCODER_SW);
-      if (buttonState == LOW && lastButtonState == HIGH) {
-        lastButtonPress = millis();
-        selectMenuItem();
-      }
+  if (millis() - startupIgnoreTime < 3000) return;
+
+  if (buttonState != lastButtonState) {
+    buttonDebounceTime = millis();
+  }
+
+  if ((millis() - buttonDebounceTime) > debounceDelay) {
+    if (lastButtonState == HIGH && buttonState == LOW) {
+      Serial.println("Button Press Detected");
+      selectMenuItem();
     }
   }
 
   lastButtonState = buttonState;
-
-  spinGoldLEDs(3000);
-}
-
-void performHoming() {
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Homing in progress");
-  for (int i = 1; i > 0; i--) {
-    lcd.setCursor(0, 1);
-    lcd.print("Wait ");
-    lcd.print(i);
-    lcd.print(" sec...   ");
-    delay(1000);
-  }
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Homing complete");
-  delay(1000);
 }
 
 void handleRotaryEncoder() {
   static int lastClkState = HIGH;
   static unsigned long lastTurnTime = 0;
+  const unsigned long encoderDebounce = 10;
 
   int clkState = digitalRead(ENCODER_CLK);
   int dtState = digitalRead(ENCODER_DT);
 
-  if (clkState != lastClkState && clkState == LOW) {
-    if (millis() - lastTurnTime > encoderDebounce) {
+  if (clkState != lastClkState) {
+    if (clkState == LOW && (millis() - lastTurnTime > encoderDebounce)) {
       int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
 
-      if (dtState == HIGH) {
+      if (dtState != clkState) {
         menuIndex++;
-        Serial.println("Rotated Clockwise");
       } else {
         menuIndex--;
-        Serial.println("Rotated CounterClockwise");
       }
 
       if (menuIndex < 0) menuIndex = menuSize - 1;
@@ -148,9 +137,21 @@ void handleRotaryEncoder() {
       showDrinkMenu();
       lastTurnTime = millis();
     }
+    lastClkState = clkState;
   }
+}
 
-  lastClkState = clkState;
+void performHoming() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Homing in progress");
+  lcd.setCursor(0, 1);
+  lcd.print("Wait 1 sec...");
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Homing complete");
+  delay(1000);
 }
 
 void showDrinkMenu() {
@@ -190,6 +191,8 @@ void showDrinkMenu() {
 }
 
 void selectMenuItem() {
+  if (makingDrink) return;
+
   lcd.clear();
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
   String selection = menu[menuIndex];
@@ -206,7 +209,10 @@ void selectMenuItem() {
       menuIndex = 0;
       menuStartIndex = 0;
     } else {
-      makeDrink(selection);
+      currentDrink = selection;
+      makingDrink = true;
+      drinkStartTime = millis();
+      drinkStep = 0;
     }
   } else {
     if (selection == "LED Settings") {
@@ -216,6 +222,7 @@ void selectMenuItem() {
     } else if (selection == "Run Diagnostics") {
       lcd.clear();
       lcd.print("Running tests...");
+      delay(1000);
     } else if (selection == "Manual Axis Ctrl") {
       lcd.clear();
       lcd.print("Manual Ctrl TBD");
@@ -226,78 +233,86 @@ void selectMenuItem() {
     menuIndex = 0;
     menuStartIndex = 0;
   }
-
-  menuIndex = -1;
 }
 
-void spinGoldLEDs(int durationMillis) {
-  unsigned long startTime = millis();
-  int pixelCount = pixels.numPixels();
-  int position = 0;
+void handleDrinkMaking() {
+  if (!makingDrink) return;
 
-  while (millis() - startTime < durationMillis) {
-    pixels.clear();
-    for (int i = 0; i < 5; i++) {
-      int index = (position + i) % pixelCount;
-      pixels.setPixelColor(index, pixels.Color(255, 215, 0));
-    }
-    pixels.show();
-    delay(60);
-    position = (position + 1) % pixelCount;
+  unsigned long now = millis();
+
+  switch (drinkStep) {
+    case 0:
+      lcd.clear();
+      lcd.print("Making Drink:");
+      lcd.setCursor(0, 1);
+      lcd.print(currentDrink);
+      drinkStep++;
+      drinkStartTime = now;
+      break;
+
+    case 1:
+      if (now - drinkStartTime >= 1000) {
+        digitalWrite(A0, HIGH);
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 2:
+      if (now - drinkStartTime >= 500) {
+        digitalWrite(A0, LOW);
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 3:
+      if (now - drinkStartTime >= 5000) {
+        if (currentDrink == "Classic Tea") {
+          digitalWrite(RELAY_FLAVOR_1, HIGH);
+        } else if (currentDrink == "Strawberry Milk") {
+          digitalWrite(RELAY_FLAVOR_2, HIGH);
+        } else if (currentDrink == "Taro Milk Tea") {
+          digitalWrite(RELAY_FLAVOR_3, HIGH);
+        }
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 4:
+      if (now - drinkStartTime >= 2000) {
+        digitalWrite(RELAY_FLAVOR_1, LOW);
+        digitalWrite(RELAY_FLAVOR_2, LOW);
+        digitalWrite(RELAY_FLAVOR_3, LOW);
+        digitalWrite(RELAY_MILK, HIGH);
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 5:
+      if (now - drinkStartTime >= 2000) {
+        digitalWrite(RELAY_MILK, LOW);
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 6:
+      if (now - drinkStartTime >= 5000) {
+        lcd.clear();
+        lcd.print("Enjoy your drink!");
+        drinkStep++;
+        drinkStartTime = now;
+      }
+      break;
+
+    case 7:
+      if (now - drinkStartTime >= 2000) {
+        makingDrink = false;
+        showDrinkMenu();
+      }
+      break;
   }
-
-  pixels.clear();
-  pixels.show();
-}
-
-void makeDrink(String drinkName) {
-  lcd.clear();
-  lcd.print("Making Drink:");
-  lcd.setCursor(0, 1);
-  lcd.print(drinkName);
-  delay(1000);
-
-  if (drinkName == "Classic Tea") {
-    digitalWrite(A0, HIGH);
-    delay(500);
-    digitalWrite(A0, LOW);
-    delay(5000);
-    digitalWrite(RELAY_FLAVOR_1, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_FLAVOR_1, LOW);
-    digitalWrite(RELAY_MILK, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_MILK, LOW);
-    delay(5000);
-
-  } else if (drinkName == "Strawberry Milk") {
-    digitalWrite(A0, HIGH);
-    delay(500);
-    digitalWrite(A0, LOW);
-    delay(5000);
-    digitalWrite(RELAY_FLAVOR_2, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_FLAVOR_2, LOW);
-    digitalWrite(RELAY_MILK, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_MILK, LOW);
-    delay(5000);
-
-  } else if (drinkName == "Taro Milk Tea") {
-    digitalWrite(A0, HIGH);
-    delay(500);
-    digitalWrite(A0, LOW);
-    delay(5000);
-    digitalWrite(RELAY_FLAVOR_3, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_FLAVOR_3, LOW);
-    digitalWrite(RELAY_MILK, HIGH);
-    delay(2000);
-    digitalWrite(RELAY_MILK, LOW);
-    delay(5000);
-  }
-
-  lcd.clear();
-  lcd.print("Enjoy your drink!");
-  delay(2000);
 }
