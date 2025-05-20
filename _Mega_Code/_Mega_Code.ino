@@ -9,14 +9,14 @@
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
 // === LEDs ===
-#define LED_STRIP_PIN 30
+#define LED_STRIP_PIN 10
 #define NUMPIXELS 40
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 // === Rotary Encoder ===
 #define ENCODER_CLK 18
 #define ENCODER_DT 19
-#define ENCODER_SW 21  // WORKING PIN
+#define ENCODER_SW 4
 
 // === Relays ===
 #define RELAY_MILK 5
@@ -40,16 +40,16 @@ int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings"};
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
-// === BUTTON STATE TRACKING ===
-bool lastButtonState = HIGH;
-unsigned long buttonDebounceTime = 0;
-const unsigned long debounceDelay = 50;
-
 // === DRINK-MAKING STATE ===
 bool makingDrink = false;
 unsigned long drinkStartTime = 0;
 int drinkStep = 0;
 String currentDrink = "";
+
+// === Encoder State ===
+int lastClk = HIGH;
+bool lastButtonState = HIGH;
+unsigned long lastDebounceTime = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -57,88 +57,42 @@ void setup() {
 
   startupIgnoreTime = millis();
 
-  pinMode(ENCODER_CLK, INPUT_PULLUP);
-  pinMode(ENCODER_DT, INPUT_PULLUP);
-  pinMode(ENCODER_SW, INPUT_PULLUP);
-
   pinMode(RELAY_FLAVOR_1, OUTPUT);
   pinMode(RELAY_FLAVOR_2, OUTPUT);
   pinMode(RELAY_FLAVOR_3, OUTPUT);
   pinMode(RELAY_MILK, OUTPUT);
   pinMode(A0, OUTPUT);
-
   digitalWrite(RELAY_FLAVOR_1, LOW);
   digitalWrite(RELAY_FLAVOR_2, LOW);
   digitalWrite(RELAY_FLAVOR_3, LOW);
   digitalWrite(RELAY_MILK, LOW);
   digitalWrite(A0, LOW);
 
+  pinMode(ENCODER_CLK, INPUT_PULLUP);
+  pinMode(ENCODER_DT, INPUT_PULLUP);
+  pinMode(ENCODER_SW, INPUT_PULLUP);
+
   lcd.init();
   lcd.backlight();
   lcd.setCursor(3, 1);
-  lcd.print("YUMMY BOBA BOT");
+  lcd.print("BUBBA BOBA 3000");
   delay(1500);
 
   pixels.begin();
   pixels.setBrightness(currentBrightness);
   pixels.clear();
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, pixels.Color(0, 0, 100));  // Blue
+  }
   pixels.show();
 
   performHoming();
-  showDrinkMenu();
+  showMenu();
 }
 
 void loop() {
-  handleRotaryEncoder();
-  handleButton();
+  handleEncoder();
   handleDrinkMaking();
-}
-
-void handleButton() {
-  bool buttonState = digitalRead(ENCODER_SW);
-
-  if (millis() - startupIgnoreTime < 3000) return;
-
-  if (buttonState != lastButtonState) {
-    buttonDebounceTime = millis();
-  }
-
-  if ((millis() - buttonDebounceTime) > debounceDelay) {
-    if (lastButtonState == HIGH && buttonState == LOW) {
-      Serial.println("Button Press Detected");
-      selectMenuItem();
-    }
-  }
-
-  lastButtonState = buttonState;
-}
-
-void handleRotaryEncoder() {
-  static int lastClkState = HIGH;
-  static unsigned long lastTurnTime = 0;
-  const unsigned long encoderDebounce = 10;
-
-  int clkState = digitalRead(ENCODER_CLK);
-  int dtState = digitalRead(ENCODER_DT);
-
-  if (clkState != lastClkState) {
-    if (clkState == LOW && (millis() - lastTurnTime > encoderDebounce)) {
-      int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
-
-      if (dtState != clkState) {
-        menuIndex++;
-      } else {
-        menuIndex--;
-      }
-
-      if (menuIndex < 0) menuIndex = menuSize - 1;
-      if (menuIndex >= menuSize) menuIndex = 0;
-
-      showDrinkMenu();
-      lastTurnTime = millis();
-    }
-    lastClkState = clkState;
-  }
 }
 
 void performHoming() {
@@ -154,49 +108,40 @@ void performHoming() {
   delay(1000);
 }
 
-void showDrinkMenu() {
-  static int lastMenuIndex = -1;
-  static int lastMenuStartIndex = -1;
-  static bool lastInDrinkMenu = !inDrinkMenu;
-
-  if (menuIndex == lastMenuIndex &&
-      menuStartIndex == lastMenuStartIndex &&
-      inDrinkMenu == lastInDrinkMenu) return;
-
-  lastMenuIndex = menuIndex;
-  lastMenuStartIndex = menuStartIndex;
-  lastInDrinkMenu = inDrinkMenu;
-
+void showMenu() {
+  lcd.clear();
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
-  int menuSize = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+  int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
 
+  // Adjust visible window
   if (menuIndex < menuStartIndex) {
     menuStartIndex = menuIndex;
-  } else if (menuIndex >= menuStartIndex + LCD_LINES) {
-    menuStartIndex = menuIndex - LCD_LINES + 1;
+  } else if (menuIndex >= menuStartIndex + 4) {
+    menuStartIndex = menuIndex - 3;
   }
 
-  for (int i = 0; i < LCD_LINES; i++) {
-    int itemIndex = menuStartIndex + i;
+  // Draw up to 4 lines
+  for (int i = 0; i < 4; i++) {
+    int itemIdx = menuStartIndex + i;
+    if (itemIdx >= size) break;
+
     lcd.setCursor(0, i);
-    if (itemIndex < menuSize) {
-      String line = (itemIndex == menuIndex ? "> " : "  ") + menu[itemIndex];
-      lcd.print(line);
-      int padding = LCD_COLUMNS - line.length();
-      while (padding-- > 0) lcd.print(" ");
+    if (itemIdx == menuIndex) {
+      lcd.print("> ");
     } else {
-      lcd.print("                    ");
+      lcd.print("  ");
     }
+    lcd.print(menu[itemIdx]);
   }
 }
 
 void selectMenuItem() {
   if (makingDrink) return;
 
-  lcd.clear();
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
   String selection = menu[menuIndex];
 
+  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Selected:");
   lcd.setCursor(0, 1);
@@ -207,7 +152,6 @@ void selectMenuItem() {
     if (selection == "Back to Control") {
       inDrinkMenu = false;
       menuIndex = 0;
-      menuStartIndex = 0;
     } else {
       currentDrink = selection;
       makingDrink = true;
@@ -231,8 +175,37 @@ void selectMenuItem() {
 
     inDrinkMenu = true;
     menuIndex = 0;
-    menuStartIndex = 0;
   }
+
+  showMenu();
+}
+
+void handleEncoder() {
+  int currentClk = digitalRead(ENCODER_CLK);
+  int currentDt = digitalRead(ENCODER_DT);
+  bool buttonState = digitalRead(ENCODER_SW);
+
+  // Rotation
+  if (currentClk != lastClk && currentClk == LOW) {
+    int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+
+    if (currentDt != currentClk) {
+      menuIndex++;
+      if (menuIndex >= size) menuIndex = 0;
+    } else {
+      menuIndex--;
+      if (menuIndex < 0) menuIndex = size - 1;
+    }
+    showMenu();
+  }
+  lastClk = currentClk;
+
+  // Button Press
+  if (buttonState == LOW && lastButtonState == HIGH && (millis() - lastDebounceTime > 250)) {
+    selectMenuItem();
+    lastDebounceTime = millis();
+  }
+  lastButtonState = buttonState;
 }
 
 void handleDrinkMaking() {
@@ -243,38 +216,57 @@ void handleDrinkMaking() {
   switch (drinkStep) {
     case 0:
       lcd.clear();
-      lcd.print("Making Drink:");
+      lcd.setCursor(0, 0);
+      lcd.print("Starting drink...");
       lcd.setCursor(0, 1);
       lcd.print(currentDrink);
+      // Opposite: keep all pumps ON initially
+      digitalWrite(RELAY_MILK, HIGH);
+      digitalWrite(RELAY_FLAVOR_1, HIGH);
+      digitalWrite(RELAY_FLAVOR_2, HIGH);
+      digitalWrite(RELAY_FLAVOR_3, HIGH);
       drinkStep++;
       drinkStartTime = now;
       break;
 
     case 1:
       if (now - drinkStartTime >= 1000) {
-        digitalWrite(A0, HIGH);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Moving cup...");
+        digitalWrite(UNO_CONNECTION, LOW); // Opposite: pull LOW to start
         drinkStep++;
         drinkStartTime = now;
       }
       break;
 
     case 2:
-      if (now - drinkStartTime >= 500) {
-        digitalWrite(A0, LOW);
+      if (now - drinkStartTime >= 1000) {
+        digitalWrite(UNO_CONNECTION, HIGH); // Opposite: pull HIGH to stop
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Dispensing milk...");
+        digitalWrite(RELAY_MILK, LOW); // Opposite: LOW means ON now
         drinkStep++;
         drinkStartTime = now;
       }
       break;
 
     case 3:
-      if (now - drinkStartTime >= 5000) {
+      if (now - drinkStartTime >= 2000) {
+        digitalWrite(RELAY_MILK, HIGH); // Opposite: HIGH means OFF now
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Adding flavor...");
+
         if (currentDrink == "Classic Tea") {
-          digitalWrite(RELAY_FLAVOR_1, HIGH);
+          digitalWrite(RELAY_FLAVOR_1, LOW);
         } else if (currentDrink == "Strawberry Milk") {
-          digitalWrite(RELAY_FLAVOR_2, HIGH);
+          digitalWrite(RELAY_FLAVOR_2, LOW);
         } else if (currentDrink == "Taro Milk Tea") {
-          digitalWrite(RELAY_FLAVOR_3, HIGH);
+          digitalWrite(RELAY_FLAVOR_3, LOW);
         }
+
         drinkStep++;
         drinkStartTime = now;
       }
@@ -282,36 +274,32 @@ void handleDrinkMaking() {
 
     case 4:
       if (now - drinkStartTime >= 2000) {
-        digitalWrite(RELAY_FLAVOR_1, LOW);
-        digitalWrite(RELAY_FLAVOR_2, LOW);
-        digitalWrite(RELAY_FLAVOR_3, LOW);
-        digitalWrite(RELAY_MILK, HIGH);
+        // Opposite: turn all flavor relays back to HIGH (off)
+        digitalWrite(RELAY_FLAVOR_1, HIGH);
+        digitalWrite(RELAY_FLAVOR_2, HIGH);
+        digitalWrite(RELAY_FLAVOR_3, HIGH);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Finishing up...");
         drinkStep++;
         drinkStartTime = now;
       }
       break;
 
     case 5:
-      if (now - drinkStartTime >= 2000) {
-        digitalWrite(RELAY_MILK, LOW);
-        drinkStep++;
-        drinkStartTime = now;
-      }
-      break;
-
-    case 6:
-      if (now - drinkStartTime >= 5000) {
+      if (now - drinkStartTime >= 1000) {
         lcd.clear();
+        lcd.setCursor(0, 0);
         lcd.print("Enjoy your drink!");
         drinkStep++;
         drinkStartTime = now;
       }
       break;
 
-    case 7:
+    case 6:
       if (now - drinkStartTime >= 2000) {
         makingDrink = false;
-        showDrinkMenu();
+        showMenu();
       }
       break;
   }
