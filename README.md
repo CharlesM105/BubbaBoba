@@ -56,7 +56,7 @@ Bubba-Boba/
     <div class="gallery">
       <img src="images/lcd_menu.jpg" alt="LCD Menu Display">
       <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
-      <img src="images/final_setup.jpg" alt="Completed Machine Setup">
+      <img src="images/IMG_2714.HEIC" alt="Completed Machine Setup">
     </div>
   </div>
 
