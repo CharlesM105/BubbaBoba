@@ -156,7 +156,7 @@
 
 <div class="section">
   <h2>📊 Project Timeline (Gantt Chart)</h2>
-  <img src="docs/gantt_chart.png" alt="Bubba Boba Gantt Chart">
+  <img src="Images/Boba Machine Gantt Chart.png" alt="Bubba Boba Gantt Chart">
 </div>
 
 <div class="section">
