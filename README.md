@@ -138,18 +138,37 @@
       <tr><td>Gray PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Clear PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>White PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
+      <tr><td><strong>Recycled Ender 3 V1 Parts</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
       <tr><th colspan="3">Total Estimated Cost</th><th>$431.12</th></tr>
     </tbody>
   </table>
+
+  <p><strong>Note:</strong> This budget includes wooden casing materials; however, they were not fully implemented in the final build due to time constraints.</p>
 
   <h3>📝 Notes</h3>
   <ul>
     <li>Prices are based on average market values as of May 2025 and may vary depending on supplier and shipping.</li>
     <li>Partial PLA rolls are estimated at 50% of a full roll (approx. 500g).</li>
     <li>Optional components (e.g., LED strips) can be excluded to lower costs.</li>
-    <li>Most mechanical components were 3D printed; their cost is factored into filament pricing.</li>
+    <li>Most <strong>design elements</strong> were 3D printed; their cost is factored into filament pricing.</li>
   </ul>
+
+  <h3>🔁 If Built Without 3D Printer Reuse</h3>
+  <p>Estimated pricing if sourcing all mechanical hardware independently:</p>
+  <table>
+    <thead>
+      <tr><th>Component</th><th>Qty</th><th>Est. Price</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Aluminum V-Slot Rails + Connectors</td><td>1</td><td>$65.00</td><td>$65.00</td></tr>
+      <tr><td>Stepper Motors (3-pack)</td><td>1</td><td>$42.95</td><td>$42.95</td></tr>
+      <tr><td>Timing Belts + Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
+      <tr><td>Gantry Plates + Mounts (3 axes)</td><td>1</td><td>$45.00</td><td>$45.00</td></tr>
+      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$170.20</th></tr>
+    </tbody>
+  </table>
 </div>
+
 <div class="section">
   <h2>📊 Project Timeline (Gantt Chart)</h2>
   <img src="docs/gantt_chart.png" alt="Bubba Boba Gantt Chart">
