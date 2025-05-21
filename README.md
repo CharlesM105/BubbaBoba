@@ -95,9 +95,6 @@
       <tr><td>I2C 20x4 LCD Display</td><td>1</td><td>$12.95</td><td>$12.95</td></tr>
       <tr><td>Rotary Encoder</td><td>1</td><td>$8.89</td><td>$8.89</td></tr>
       <tr><td>V-Slot Screws (25 pcs)</td><td>1</td><td>$2.36</td><td>$2.36</td></tr>
-      <tr><td>3-Wheel Gantry Plate</td><td>1</td><td>$6.75</td><td>$6.75</td></tr>
-      <tr><td>4-Wheel Gantry Plate</td><td>3</td><td>$14.89</td><td>$44.67</td></tr>
-      <tr><td>12V Power Supply</td><td>1</td><td>$8.99</td><td>$8.99</td></tr>
       <tr><td>Limit Switches (10 pcs)</td><td>1</td><td>$5.99</td><td>$5.99</td></tr>
       <tr><td>Belts and Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
       <tr><td>Lead Screw Kit</td><td>1</td><td>$18.45</td><td>$18.45</td></tr>
@@ -109,26 +106,26 @@
       <tr><td>120mm Fans</td><td>2</td><td>$6.00</td><td>$12.00</td></tr>
       <tr><td>Acrylic Sheets</td><td>2</td><td>$10.00</td><td>$20.00</td></tr>
       <tr><td>Cups</td><td>1</td><td>$5.00</td><td>$5.00</td></tr>
-      <tr><td>Boba Flavor Kits</td><td>2</td><td>$15.00</td><td>$30.00</td></tr>
-      <tr><td>Milk</td><td>1</td><td>$3.00</td><td>$3.00</td></tr>
+      <tr><td>Boba Flavor Kits</td><td>3</td><td>$15.00</td><td>$45.00</td></tr>
+      <tr><td>Milk</td><td>2</td><td>$3.00</td><td>$6.00</td></tr>
       <tr><td>Thin Wood Sheets (6-pack)</td><td>1</td><td>$10.00</td><td>$10.00</td></tr>
       <tr><td>Diaphragm Pumps</td><td>4</td><td>$8.00</td><td>$32.00</td></tr>
       <tr><td>LED Strips (optional)</td><td>2</td><td>$10.00</td><td>$20.00</td></tr>
       <tr><td>Relay Modules (10-pack)</td><td>1</td><td>$12.00</td><td>$12.00</td></tr>
       <tr><td>Tubing</td><td>1</td><td>$5.00</td><td>$5.00</td></tr>
-      <tr><td>RFID Reader</td><td>1</td><td>$10.00</td><td>$10.00</td></tr>
+      <tr><td><strong>Recycled Ender 3 V1 Parts (Motors, Rails, Mounts, Power Supply)</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
       <tr><td><strong>3D Printing Filament (Partial Rolls)</strong></td><td></td><td></td><td></td></tr>
       <tr><td>Black PLA (2 partial rolls)</td><td>1</td><td>$15.00</td><td>$15.00</td></tr>
       <tr><td>Gold PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Gray PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Clear PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>White PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
-      <tr><td><strong>Recycled Ender 3 V1 Parts</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
-      <tr><th colspan="3">Total Estimated Cost</th><th>$431.12</th></tr>
+      <tr><th colspan="3">Total Estimated Cost</th><th>$448.45</th></tr>
     </tbody>
   </table>
 
   <p><strong>Note:</strong> This budget includes wooden casing materials; however, they were not fully implemented in the final build due to time constraints.</p>
+  <p><strong>Note:</strong> RFID module was excluded from the final system due to time constraints.</p>
 
   <h3>📝 Notes</h3>
   <ul>
@@ -148,11 +145,14 @@
       <tr><td>Aluminum V-Slot Rails + Connectors</td><td>1</td><td>$65.00</td><td>$65.00</td></tr>
       <tr><td>Stepper Motors (3-pack)</td><td>1</td><td>$42.95</td><td>$42.95</td></tr>
       <tr><td>Timing Belts + Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
-      <tr><td>Gantry Plates + Mounts (3 axes)</td><td>1</td><td>$45.00</td><td>$45.00</td></tr>
-      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$170.20</th></tr>
+      <tr><td>3-Wheel Gantry Plate</td><td>1</td><td>$6.75</td><td>$6.75</td></tr>
+      <tr><td>4-Wheel Gantry Plates</td><td>3</td><td>$14.89</td><td>$44.67</td></tr>
+      <tr><td>12V Power Supply</td><td>1</td><td>$8.99</td><td>$8.99</td></tr>
+      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$185.61</th></tr>
     </tbody>
   </table>
 </div>
+
 
 <div class="section">
   <h2>📊 Project Timeline (Gantt Chart)</h2>
