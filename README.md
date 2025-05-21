@@ -63,27 +63,6 @@
 </div>
 
 <div class="section">
-  <h2>📦 Code Logic Summary</h2>
-  <ul>
-    <li><strong>main.ino (Mega):</strong>
-      <ul>
-        <li>Menu interface + drink selection logic</li>
-        <li>Drink sequence (milk, flavor, light signal)</li>
-        <li>Trigger Uno via pin → LED → photoresistor</li>
-      </ul>
-    </li>
-    <li><strong>movement_sequence.ino (Uno):</strong>
-      <ul>
-        <li>Stepper homing, position logic (X/Y/Z)</li>
-        <li>Servo open-close for syrup</li>
-        <li>Mixer and boba delivery stepper control</li>
-        <li>Triggered only when light signal is received</li>
-      </ul>
-    </li>
-  </ul>
-</div>
-
-<div class="section">
   <h2>💸 Updated Cost Breakdown</h2>
   <table>
     <thead>
@@ -95,10 +74,10 @@
       <tr><td>I2C 20x4 LCD Display</td><td>1</td><td>$12.95</td><td>$12.95</td></tr>
       <tr><td>Rotary Encoder</td><td>1</td><td>$8.89</td><td>$8.89</td></tr>
       <tr><td>V-Slot Screws (25 pcs)</td><td>1</td><td>$2.36</td><td>$2.36</td></tr>
-      <tr><td>Limit Switches (10 pcs)</td><td>1</td><td>$5.99</td><td>$5.99</td></tr>
+      <tr><td>Buttons (for axis limits)</td><td>3</td><td>$1.00</td><td>$3.00</td></tr>
       <tr><td>Belts and Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
       <tr><td>Lead Screw Kit</td><td>1</td><td>$18.45</td><td>$18.45</td></tr>
-      <tr><td>Stepper Motors (3-pack)</td><td>1</td><td>$42.95</td><td>$42.95</td></tr>
+      <tr><td>Stepper Motor (Single)</td><td>1</td><td>$14.32</td><td>$14.32</td></tr>
       <tr><td>Motor Drivers (4-pack)</td><td>1</td><td>$9.99</td><td>$9.99</td></tr>
       <tr><td>12V DC Motor</td><td>1</td><td>$14.99</td><td>$14.99</td></tr>
       <tr><td>Mini 5V Motors (3-pack)</td><td>1</td><td>$7.99</td><td>$7.99</td></tr>
@@ -113,14 +92,14 @@
       <tr><td>LED Strips (optional)</td><td>2</td><td>$10.00</td><td>$20.00</td></tr>
       <tr><td>Relay Modules (10-pack)</td><td>1</td><td>$12.00</td><td>$12.00</td></tr>
       <tr><td>Tubing</td><td>1</td><td>$5.00</td><td>$5.00</td></tr>
-      <tr><td><strong>Recycled Ender 3 V1 Parts (Motors, Rails, Mounts, Power Supply)</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
+      <tr><td><strong>Recycled Ender 3 V1 Parts (Rails, Mounts, Power Supply)</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
       <tr><td><strong>3D Printing Filament (Partial Rolls)</strong></td><td></td><td></td><td></td></tr>
       <tr><td>Black PLA (2 partial rolls)</td><td>1</td><td>$15.00</td><td>$15.00</td></tr>
       <tr><td>Gold PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Gray PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Clear PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>White PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
-      <tr><th colspan="3">Total Estimated Cost</th><th>$448.45</th></tr>
+      <tr><th colspan="3">Total Estimated Cost</th><th>$450.14</th></tr>
     </tbody>
   </table>
 
@@ -143,12 +122,12 @@
     </thead>
     <tbody>
       <tr><td>Aluminum V-Slot Rails + Connectors</td><td>1</td><td>$65.00</td><td>$65.00</td></tr>
-      <tr><td>Stepper Motors (3-pack)</td><td>1</td><td>$42.95</td><td>$42.95</td></tr>
+      <tr><td>Stepper Motors</td><td>3</td><td>$14.32</td><td>$42.96</td></tr>
       <tr><td>Timing Belts + Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
       <tr><td>3-Wheel Gantry Plate</td><td>1</td><td>$6.75</td><td>$6.75</td></tr>
       <tr><td>4-Wheel Gantry Plates</td><td>3</td><td>$14.89</td><td>$44.67</td></tr>
       <tr><td>12V Power Supply</td><td>1</td><td>$8.99</td><td>$8.99</td></tr>
-      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$185.61</th></tr>
+      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$185.62</th></tr>
     </tbody>
   </table>
 </div>
