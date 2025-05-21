@@ -1,19 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bubba Boba</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: auto; line-height: 1.6; }
-    h1, h2 { color: #8B0000; }
-    .section { margin-bottom: 40px; }
-    ul, ol { margin-left: 20px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
-    img { max-width: 100%; height: auto; margin: 10px 0; }
-  </style>
+
 </head>
 <body>
 
