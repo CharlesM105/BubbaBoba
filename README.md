@@ -70,12 +70,11 @@
     </thead>
     <tbody>
       <tr><td><strong>Electronics & Hardware</strong></td><td></td><td></td><td></td></tr>
-      <tr><td>Arduino Mega 2560</td><td>1</td><td>$43.30</td><td>$43.30</td></tr>
-      <tr><td>I2C 20x4 LCD Display</td><td>1</td><td>$12.95</td><td>$12.95</td></tr>
+      <tr><td>Arduino Mega 2560</td><td>1</td><td>$49.65</td><td>$49.65</td></tr>
+      <tr><td>I2C 20x4 LCD Display</td><td>1</td><td>$13.76</td><td>$13.76</td></tr>
       <tr><td>Rotary Encoder</td><td>1</td><td>$8.89</td><td>$8.89</td></tr>
       <tr><td>V-Slot Screws (25 pcs)</td><td>1</td><td>$2.36</td><td>$2.36</td></tr>
       <tr><td>Buttons (for axis limits)</td><td>3</td><td>$1.00</td><td>$3.00</td></tr>
-      <tr><td>Belts and Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
       <tr><td>Lead Screw Kit</td><td>1</td><td>$18.45</td><td>$18.45</td></tr>
       <tr><td>Stepper Motor (Single)</td><td>1</td><td>$14.32</td><td>$14.32</td></tr>
       <tr><td>Motor Drivers (4-pack)</td><td>1</td><td>$9.99</td><td>$9.99</td></tr>
@@ -84,9 +83,9 @@
       <tr><td>Buck Converters (3-pack)</td><td>1</td><td>$14.99</td><td>$14.99</td></tr>
       <tr><td>120mm Fans</td><td>2</td><td>$6.00</td><td>$12.00</td></tr>
       <tr><td>Acrylic Sheets</td><td>2</td><td>$10.00</td><td>$20.00</td></tr>
-      <tr><td>Cups</td><td>1</td><td>$5.00</td><td>$5.00</td></tr>
-      <tr><td>Boba Flavor Kits</td><td>3</td><td>$15.00</td><td>$45.00</td></tr>
-      <tr><td>Milk</td><td>2</td><td>$3.00</td><td>$6.00</td></tr>
+      <tr><td>Cups (100-pack)</td><td>1</td><td>$16.99</td><td>$16.99</td></tr>
+      <tr><td>Boba Flavor Kits</td><td>3</td><td>$22.00</td><td>$66.00</td></tr>
+      <tr><td>Milk</td><td>2</td><td>$4.50</td><td>$9.00</td></tr>
       <tr><td>Thin Wood Sheets (6-pack)</td><td>1</td><td>$10.00</td><td>$10.00</td></tr>
       <tr><td>Diaphragm Pumps</td><td>4</td><td>$8.00</td><td>$32.00</td></tr>
       <tr><td>LED Strips (optional)</td><td>2</td><td>$10.00</td><td>$20.00</td></tr>
@@ -99,7 +98,7 @@
       <tr><td>Gray PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Clear PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>White PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
-      <tr><th colspan="3">Total Estimated Cost</th><th>$450.14</th></tr>
+      <tr><th colspan="3">Total Estimated Cost</th><th>$450.83</th></tr>
     </tbody>
   </table>
 
@@ -109,6 +108,7 @@
   <h3>📝 Notes</h3>
   <ul>
     <li>Prices are based on average market values as of May 2025 and may vary depending on supplier and shipping.</li>
+    <li><strong>Tariff and import duty costs are not reflected in these estimates.</strong></li>
     <li>Partial PLA rolls are estimated at 50% of a full roll (approx. 500g).</li>
     <li>Optional components (e.g., LED strips) can be excluded to lower costs.</li>
     <li>Most <strong>design elements</strong> were 3D printed; their cost is factored into filament pricing.</li>
@@ -131,6 +131,7 @@
     </tbody>
   </table>
 </div>
+
 
 
 <div class="section">
