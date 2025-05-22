@@ -147,6 +147,11 @@
     <img src="images/neopixels.jpg" alt="LED Strip Animation">
     <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
+    <img src="images/cleaning_mode.jpg" alt="Main Board">
+    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
+    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
+    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
+    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
   </div>
 </div>
 
