@@ -29,10 +29,10 @@ const unsigned long MIX_DURATION = 3000;
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
 
-String drinkMenu[] = {"Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
+String drinkMenu[] = { "Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control" };
 int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 
-String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings", "Cleaning"};
+String controlMenu[] = { "Run Diagnostics", "Manual Axis Ctrl", "LED Settings", "Cleaning" };
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
 bool makingDrink = false;
@@ -77,9 +77,6 @@ void setup() {
   pixels.begin();
   pixels.setBrightness(51);
   pixels.clear();
-  for (int i = 0; i < NUMPIXELS; i++) {
-    pixels.setPixelColor(i, pixels.Color(0, 0, 100));
-  }
   pixels.show();
 
   performHoming();
@@ -89,6 +86,28 @@ void setup() {
 void loop() {
   handleEncoder();
   handleDrinkMaking();
+  animateGoldSpin();  // New LED effect
+}
+
+void animateGoldSpin() {
+  static int currentPixel = 0;
+  static unsigned long lastUpdate = 0;
+  const unsigned long interval = 50; // speed of spin
+  const int trailLength = 5;         // number of LEDs lit at once
+  uint32_t goldColor = pixels.Color(255, 215, 0);  // Gold color
+
+  if (millis() - lastUpdate > interval) {
+    pixels.clear();
+
+    for (int i = 0; i < trailLength; i++) {
+      int ledIndex = (currentPixel + i) % NUMPIXELS;
+      pixels.setPixelColor(ledIndex, goldColor);
+    }
+
+    pixels.show();
+    currentPixel = (currentPixel + 1) % NUMPIXELS;
+    lastUpdate = millis();
+  }
 }
 
 void performHoming() {
@@ -171,7 +190,7 @@ void selectMenuItem() {
       digitalWrite(RELAY_FLAVOR_1, LOW);
       digitalWrite(RELAY_FLAVOR_2, LOW);
       digitalWrite(RELAY_FLAVOR_3, LOW);
-      delay(30000); // 30 seconds
+      delay(30000);  // 30 seconds
       digitalWrite(RELAY_MILK, HIGH);
       digitalWrite(RELAY_FLAVOR_1, HIGH);
       digitalWrite(RELAY_FLAVOR_2, HIGH);
@@ -203,8 +222,8 @@ void handleEncoder() {
     } else {
       int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
       menuIndex = (currentDt != currentClk)
-        ? (menuIndex + 1) % size
-        : (menuIndex - 1 + size) % size;
+                    ? (menuIndex + 1) % size
+                    : (menuIndex - 1 + size) % size;
       showMenu();
     }
   }
@@ -224,8 +243,6 @@ void handleEncoder() {
   }
   lastButtonState = buttonState;
 }
-
-// your handleDrinkMaking() remains unchanged from the previous version
 
 void handleDrinkMaking() {
   if (!makingDrink) return;
@@ -272,12 +289,12 @@ void handleDrinkMaking() {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Dispensing milk...");
-        digitalWrite(RELAY_MILK, LOW);  // Turn ON (for active LOW relay)
+        digitalWrite(RELAY_MILK, LOW);
         messageDisplayed = true;
         drinkStartTime = now;
       }
       if (now - drinkStartTime >= MILK_DURATION) {
-        digitalWrite(RELAY_MILK, HIGH); // Turn OFF
+        digitalWrite(RELAY_MILK, HIGH);
         drinkStep++;
         messageDisplayed = false;
       }
