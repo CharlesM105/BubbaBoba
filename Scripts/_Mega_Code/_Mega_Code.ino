@@ -20,7 +20,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define RELAY_FLAVOR_2 7
 #define RELAY_FLAVOR_3 8
 #define UNO_CONNECTION A0
-#define MIXER_PIN A2
+#define MIXER_PIN 53
 
 const unsigned long MILK_DURATION = 5000;
 const unsigned long FLAVOR_DURATION = 6000;
@@ -267,6 +267,8 @@ void handleDrinkMaking() {
 
     case 2:
       if (!messageDisplayed) {
+        delay(3000);
+        digitalWrite(UNO_CONNECTION, LOW);
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Dispensing milk...");
