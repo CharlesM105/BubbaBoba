@@ -148,7 +148,7 @@
     <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
     <img src="Images/board.jpeg" alt="Main Board">
-    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
+    <img src="Images/mega.jpeg" alt="Stepper Moters">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
