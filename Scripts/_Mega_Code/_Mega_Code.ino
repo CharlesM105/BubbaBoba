@@ -2,71 +2,67 @@
 #include <SPI.h>
 #include <Adafruit_NeoPixel.h>
 
-// === LCD ===
 #define I2C_ADDR 0x27
 #define LCD_COLUMNS 20
 #define LCD_LINES 4
 LiquidCrystal_I2C lcd(I2C_ADDR, LCD_COLUMNS, LCD_LINES);
 
-// === LEDs ===
 #define LED_STRIP_PIN 10
 #define NUMPIXELS 40
 Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
-// === Rotary Encoder ===
 #define ENCODER_CLK 18
 #define ENCODER_DT 19
 #define ENCODER_SW 4
 
-// === Relays ===
 #define RELAY_MILK 5
 #define RELAY_FLAVOR_1 6
 #define RELAY_FLAVOR_2 7
 #define RELAY_FLAVOR_3 8
-
 #define UNO_CONNECTION A0
+#define MIXER_PIN A2
 
-int milkRatio = 60, flavorRatio = 20, bobaRatio = 20;
-int redColor = 0, greenColor = 0, blueColor = 0;
-int currentBrightness = 51;
+const unsigned long MILK_DURATION = 5000;
+const unsigned long FLAVOR_DURATION = 6000;
+const unsigned long MIX_DURATION = 3000;
 
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
-unsigned long startupIgnoreTime = 0;
 
 String drinkMenu[] = {"Classic Tea", "Strawberry Milk", "Taro Milk Tea", "Back to Control"};
 int drinkMenuSize = sizeof(drinkMenu) / sizeof(drinkMenu[0]);
 
-String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings"};
+String controlMenu[] = {"Run Diagnostics", "Manual Axis Ctrl", "LED Settings", "Cleaning"};
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
-// === DRINK-MAKING STATE ===
 bool makingDrink = false;
+bool promptingBoba = false;
+int bobaChoice = 0;
 unsigned long drinkStartTime = 0;
 int drinkStep = 0;
 String currentDrink = "";
+bool messageDisplayed = false;
 
-// === Encoder State ===
 int lastClk = HIGH;
 bool lastButtonState = HIGH;
 unsigned long lastDebounceTime = 0;
 
 void setup() {
   Serial.begin(9600);
-  Serial1.begin(9600);
-
-  startupIgnoreTime = millis();
 
   pinMode(RELAY_FLAVOR_1, OUTPUT);
   pinMode(RELAY_FLAVOR_2, OUTPUT);
   pinMode(RELAY_FLAVOR_3, OUTPUT);
   pinMode(RELAY_MILK, OUTPUT);
-  pinMode(A0, OUTPUT);
-  digitalWrite(RELAY_FLAVOR_1, LOW);
-  digitalWrite(RELAY_FLAVOR_2, LOW);
-  digitalWrite(RELAY_FLAVOR_3, LOW);
-  digitalWrite(RELAY_MILK, LOW);
-  digitalWrite(A0, LOW);
+  pinMode(UNO_CONNECTION, OUTPUT);
+  pinMode(MIXER_PIN, OUTPUT);
+
+  digitalWrite(RELAY_FLAVOR_1, HIGH);
+  digitalWrite(RELAY_FLAVOR_2, HIGH);
+  digitalWrite(RELAY_FLAVOR_3, HIGH);
+  digitalWrite(RELAY_MILK, HIGH);
+  digitalWrite(UNO_CONNECTION, LOW);
+  digitalWrite(MIXER_PIN, LOW);
 
   pinMode(ENCODER_CLK, INPUT_PULLUP);
   pinMode(ENCODER_DT, INPUT_PULLUP);
@@ -79,10 +75,10 @@ void setup() {
   delay(1500);
 
   pixels.begin();
-  pixels.setBrightness(currentBrightness);
+  pixels.setBrightness(51);
   pixels.clear();
   for (int i = 0; i < NUMPIXELS; i++) {
-    pixels.setPixelColor(i, pixels.Color(0, 0, 100));  // Blue
+    pixels.setPixelColor(i, pixels.Color(0, 0, 100));
   }
   pixels.show();
 
@@ -99,8 +95,6 @@ void performHoming() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Homing in progress");
-  lcd.setCursor(0, 1);
-  lcd.print("Wait 1 sec...");
   delay(1000);
   lcd.clear();
   lcd.setCursor(0, 0);
@@ -113,24 +107,18 @@ void showMenu() {
   String* menu = inDrinkMenu ? drinkMenu : controlMenu;
   int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
 
-  // Adjust visible window
   if (menuIndex < menuStartIndex) {
     menuStartIndex = menuIndex;
   } else if (menuIndex >= menuStartIndex + 4) {
     menuStartIndex = menuIndex - 3;
   }
 
-  // Draw up to 4 lines
   for (int i = 0; i < 4; i++) {
     int itemIdx = menuStartIndex + i;
     if (itemIdx >= size) break;
 
     lcd.setCursor(0, i);
-    if (itemIdx == menuIndex) {
-      lcd.print("> ");
-    } else {
-      lcd.print("  ");
-    }
+    lcd.print((itemIdx == menuIndex) ? "> " : "  ");
     lcd.print(menu[itemIdx]);
   }
 }
@@ -154,16 +142,16 @@ void selectMenuItem() {
       menuIndex = 0;
     } else {
       currentDrink = selection;
-      makingDrink = true;
-      drinkStartTime = millis();
-      drinkStep = 0;
+      promptingBoba = true;
+      bobaChoice = 0;
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Add boba?");
+      lcd.setCursor(0, 1);
+      lcd.print("> Yes");
     }
   } else {
-    if (selection == "LED Settings") {
-      lcd.clear();
-      lcd.print("LED Settings TBD");
-      delay(1000);
-    } else if (selection == "Run Diagnostics") {
+    if (selection == "Run Diagnostics") {
       lcd.clear();
       lcd.print("Running tests...");
       delay(1000);
@@ -171,8 +159,28 @@ void selectMenuItem() {
       lcd.clear();
       lcd.print("Manual Ctrl TBD");
       delay(1000);
+    } else if (selection == "LED Settings") {
+      lcd.clear();
+      lcd.print("LED Settings TBD");
+      delay(1000);
+    } else if (selection == "Cleaning") {
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Cleaning started...");
+      digitalWrite(RELAY_MILK, LOW);
+      digitalWrite(RELAY_FLAVOR_1, LOW);
+      digitalWrite(RELAY_FLAVOR_2, LOW);
+      digitalWrite(RELAY_FLAVOR_3, LOW);
+      delay(30000); // 30 seconds
+      digitalWrite(RELAY_MILK, HIGH);
+      digitalWrite(RELAY_FLAVOR_1, HIGH);
+      digitalWrite(RELAY_FLAVOR_2, HIGH);
+      digitalWrite(RELAY_FLAVOR_3, HIGH);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("Cleaning complete");
+      delay(1500);
     }
-
     inDrinkMenu = true;
     menuIndex = 0;
   }
@@ -185,28 +193,39 @@ void handleEncoder() {
   int currentDt = digitalRead(ENCODER_DT);
   bool buttonState = digitalRead(ENCODER_SW);
 
-  // Rotation
   if (currentClk != lastClk && currentClk == LOW) {
-    int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
-
-    if (currentDt != currentClk) {
-      menuIndex++;
-      if (menuIndex >= size) menuIndex = 0;
+    if (promptingBoba) {
+      bobaChoice = 1 - bobaChoice;
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+      lcd.setCursor(0, 1);
+      lcd.print("> " + String(bobaChoice == 0 ? "Yes" : "No"));
     } else {
-      menuIndex--;
-      if (menuIndex < 0) menuIndex = size - 1;
+      int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+      menuIndex = (currentDt != currentClk)
+        ? (menuIndex + 1) % size
+        : (menuIndex - 1 + size) % size;
+      showMenu();
     }
-    showMenu();
   }
   lastClk = currentClk;
 
-  // Button Press
   if (buttonState == LOW && lastButtonState == HIGH && (millis() - lastDebounceTime > 250)) {
-    selectMenuItem();
+    if (promptingBoba) {
+      promptingBoba = false;
+      makingDrink = true;
+      messageDisplayed = false;
+      drinkStep = 0;
+      drinkStartTime = millis();
+    } else {
+      selectMenuItem();
+    }
     lastDebounceTime = millis();
   }
   lastButtonState = buttonState;
 }
+
+// your handleDrinkMaking() remains unchanged from the previous version
 
 void handleDrinkMaking() {
   if (!makingDrink) return;
@@ -215,88 +234,97 @@ void handleDrinkMaking() {
 
   switch (drinkStep) {
     case 0:
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Starting drink...");
-      lcd.setCursor(0, 1);
-      lcd.print(currentDrink);
-      // Opposite: keep all pumps ON initially
-      digitalWrite(RELAY_MILK, HIGH);
-      digitalWrite(RELAY_FLAVOR_1, HIGH);
-      digitalWrite(RELAY_FLAVOR_2, HIGH);
-      digitalWrite(RELAY_FLAVOR_3, HIGH);
-      drinkStep++;
-      drinkStartTime = now;
+      if (!messageDisplayed) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Starting drink...");
+        lcd.setCursor(0, 1);
+        lcd.print(currentDrink);
+        messageDisplayed = true;
+        drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= 1500) {
+        drinkStep++;
+        messageDisplayed = false;
+      }
       break;
 
     case 1:
-      if (now - drinkStartTime >= 1000) {
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Moving cup...");
-        digitalWrite(UNO_CONNECTION, LOW); // Opposite: pull LOW to start
-        drinkStep++;
+        digitalWrite(UNO_CONNECTION, LOW);
+        messageDisplayed = true;
         drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= 2000) {
+        digitalWrite(UNO_CONNECTION, HIGH);
+        drinkStep++;
+        messageDisplayed = false;
       }
       break;
 
     case 2:
-      if (now - drinkStartTime >= 1000) {
-        digitalWrite(UNO_CONNECTION, HIGH); // Opposite: pull HIGH to stop
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Dispensing milk...");
-        digitalWrite(RELAY_MILK, LOW); // Opposite: LOW means ON now
-        drinkStep++;
+        digitalWrite(RELAY_MILK, LOW);  // Turn ON (for active LOW relay)
+        messageDisplayed = true;
         drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= MILK_DURATION) {
+        digitalWrite(RELAY_MILK, HIGH); // Turn OFF
+        drinkStep++;
+        messageDisplayed = false;
       }
       break;
 
     case 3:
-      if (now - drinkStartTime >= 2000) {
-        digitalWrite(RELAY_MILK, HIGH); // Opposite: HIGH means OFF now
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Adding flavor...");
-
-        if (currentDrink == "Classic Tea") {
-          digitalWrite(RELAY_FLAVOR_1, LOW);
-        } else if (currentDrink == "Strawberry Milk") {
-          digitalWrite(RELAY_FLAVOR_2, LOW);
-        } else if (currentDrink == "Taro Milk Tea") {
-          digitalWrite(RELAY_FLAVOR_3, LOW);
-        }
-
-        drinkStep++;
+        if (currentDrink == "Classic Tea") digitalWrite(RELAY_FLAVOR_1, LOW);
+        else if (currentDrink == "Strawberry Milk") digitalWrite(RELAY_FLAVOR_2, LOW);
+        else if (currentDrink == "Taro Milk Tea") digitalWrite(RELAY_FLAVOR_3, LOW);
+        messageDisplayed = true;
         drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= FLAVOR_DURATION) {
+        digitalWrite(RELAY_FLAVOR_1, HIGH);
+        digitalWrite(RELAY_FLAVOR_2, HIGH);
+        digitalWrite(RELAY_FLAVOR_3, HIGH);
+        drinkStep++;
+        messageDisplayed = false;
       }
       break;
 
     case 4:
-      if (now - drinkStartTime >= 2000) {
-        // Opposite: turn all flavor relays back to HIGH (off)
-        digitalWrite(RELAY_FLAVOR_1, HIGH);
-        digitalWrite(RELAY_FLAVOR_2, HIGH);
-        digitalWrite(RELAY_FLAVOR_3, HIGH);
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("Finishing up...");
-        drinkStep++;
+        lcd.print("Mixing...");
+        digitalWrite(MIXER_PIN, HIGH);
+        messageDisplayed = true;
         drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= MIX_DURATION) {
+        digitalWrite(MIXER_PIN, LOW);
+        drinkStep++;
+        messageDisplayed = false;
       }
       break;
 
     case 5:
-      if (now - drinkStartTime >= 1000) {
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Enjoy your drink!");
-        drinkStep++;
+        messageDisplayed = true;
         drinkStartTime = now;
       }
-      break;
-
-    case 6:
       if (now - drinkStartTime >= 2000) {
         makingDrink = false;
         showMenu();
