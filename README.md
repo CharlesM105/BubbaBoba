@@ -144,6 +144,7 @@
   <div>
     <img src="images/lcd_menu.jpg" alt="LCD UI">
     <img src="Images/finalbuild.jpg" alt="Final Build">
+    <img src="Images/mess.jpeg" alt="Ground Zero">
     <img src="images/neopixels.jpg" alt="LED Strip Animation">
     <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
     <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
