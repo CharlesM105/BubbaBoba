@@ -1,43 +1,82 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2821
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 # \uc0\u55358 \u56830  Bill of Materials \'96 Boba Machine\
-\
-| Component                | Quantity     | Description                                 | Link                                               |\
-|--------------------------|--------------|---------------------------------------------|----------------------------------------------------|\
-| Arduino Mega             | 1            | Main microcontroller                        | [Buy](https://www.amazon.com/dp/B0046AMGW0)        |\
-| I2C 20x4 Display         | 1            | LCD for user interface                      | [Buy](https://www.amazon.com/dp/B082Y37WXG)        |\
-| Rotary Encoder           | 1            | For menu navigation                         | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |\
-| V-Slot Screws            | 1 set        | For frame assembly                          | [Buy](https://www.amazon.com/dp/B0BZP8T639)        |\
-| 3 Wheel Gantry Plate     | 1            | For linear motion                           | [Buy](https://www.amazon.com/dp/B09VC1PWLL)        |\
-| 4 Wheel Gantry Plate     | 3            | For linear motion                           | [Buy](https://www.amazon.com/dp/B0986PYTNJ)        |\
-| 12V Power Supply         | 1            | Powers the system                           | [Buy](https://www.amazon.com/dp/B00D7CWSCG)        |\
-| Limit Switches           | 1 set        | For end-stop detection                      | [Buy](https://www.amazon.com/dp/B07X142VGC)        |\
-| Belts and Pulleys        | 1 set        | For motion transmission                     | [Buy](https://www.amazon.com/dp/B07JKT5BZQ)        |\
-| Larger Pulley            | 1            | For increased torque                        | [Buy](https://www.amazon.com/dp/B0DNF8QZZG)        |\
-| Lead Screw Kit           | 1            | For precise linear motion                   | [Buy](https://www.amazon.com/dp/B07ZV1S9G3)        |\
-| Stepper Motors (3 pack)  | 1 set        | For driving motion components               | [Buy](https://www.amazon.com/dp/B0CX91RHF9)        |\
-| Motor Drivers            | 1 set        | Controls stepper motors                     | [Buy](https://www.amazon.com/dp/B07ZV1S9G3)        |\
-| 12V Motor                | 1            | For auxiliary mechanisms                    | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |\
-| Mini 5V Motors           | 1 set        | For small mechanical tasks                  | [Buy](https://www.amazon.com/dp/B0D6DR31TS)        |\
-| Buck Converters (3 pack) | 1 set        | Voltage regulation                          | [Buy](https://www.amazon.com/dp/B0BTBVDB4S)        |\
-| 120mm Fans               | 2            | For cooling                                 | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |\
-| Acrylic Sheets           | 2            | For casing and panels                       | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |\
-| Cups                     | 1 set        | Serving cups                                | [Buy](https://www.amazon.com/dp/B09T32JMJM)        |\
-| Straws                   | 1 set        | Drinking straws                             | [Buy](https://www.amazon.com/dp/B09C7KNSJX)        |\
-| Mango Syrup              | 1 bottle     | Flavoring ingredient                        | [Buy](https://www.amazon.com/dp/B000PD9FH6)        |\
-| Brown Sugar Syrup        | 1 bottle     | Flavoring ingredient                        | [Buy](https://www.amazon.com/dp/B08HW4C5GK)        |\
-| Melon Syrup              | 1 bottle     | Flavoring ingredient                        | [Buy](https://www.amazon.com/dp/B005QBH1QY)        |\
-| Chocolate Syrup          | 1 bottle     | Flavoring ingredient                        | [Buy](https://www.walmart.com)                     |\
-| Milk                     | 1 gallon     | Base ingredient                             | [Buy](https://www.walmart.com)                     |\
-| Tapioca Pearls           | 1 pack       | Boba pearls                                 | [Buy](https://www.amazon.com/dp/B007AX3ABG)        |\
-| Thin Wood for Case       | 1 set (6 pack)| For structural components                  | [Buy](https://www.amazon.com/dp/B0D5VBDC6M)        |\
-| Diaphragm Pumps          | 4            | For liquid dispensing                       | [Buy](https://www.amazon.com/dp/B09ZX4TFNG)        |\
-| LED Strips               | 2            | For lighting effects                        | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |\
-| Relay Modules (10 pack)  | 1 set        | For controlling high-power components       | [Buy](https://www.amazon.com/dp/B0972R8QZS)        |\
-| Tubing                   | 1 set        | For liquid transfer                         | [Buy](https://www.amazon.com/dp/B0852JYLVG)        |\
-| RFID Reader              | 1            | For user authentication                     | [Buy](https://www.amazon.com/dp/B07P6K9BL3)        |}
+</head>
+<body>
+
+<h1>🧋 Bubba Boba – Bill of Materials (BOM)</h1>
+
+<div class="section">
+  <h2>✅ With 3D Printer (Reused Ender 3 Parts)</h2>
+  <table>
+    <thead>
+      <tr><th>Item</th><th>Cost</th><th>Purchase Link</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Arduino Mega 2560</td><td>$49.65</td><td><a href="https://www.amazon.com/dp/B0046AMGW0">Buy</a></td></tr>
+      <tr><td>I2C 20x4 LCD Display</td><td>$13.76</td><td><a href="https://www.amazon.com/dp/B01GPUMP36">Buy</a></td></tr>
+      <tr><td>Rotary Encoder</td><td>$8.89</td><td><a href="https://www.amazon.com/dp/B01N9GRK0H">Buy</a></td></tr>
+      <tr><td>V-Slot Screws</td><td>$2.36</td><td><a href="https://www.amazon.com/dp/B07C5L3G8R">Buy</a></td></tr>
+      <tr><td>Buttons</td><td>$3.00</td><td><a href="https://www.amazon.com/dp/B08B5D7GKT">Buy</a></td></tr>
+      <tr><td>Lead Screw Kit</td><td>$18.45</td><td><a href="https://www.amazon.com/dp/B01E94NB3Q">Buy</a></td></tr>
+      <tr><td>Stepper Motor</td><td>$14.32</td><td><a href="https://www.amazon.com/dp/B00PNEQKC0">Buy</a></td></tr>
+      <tr><td>Motor Drivers (4-pack)</td><td>$9.99</td><td><a href="https://www.amazon.com/dp/B07GYLSH8G">Buy</a></td></tr>
+      <tr><td>12V DC Motor</td><td>$14.99</td><td><a href="https://www.amazon.com/dp/B00RPA8GG6">Buy</a></td></tr>
+      <tr><td>Mini 5V Motors (3-pack)</td><td>$7.99</td><td><a href="https://www.amazon.com/dp/B07X7K9ZDB">Buy</a></td></tr>
+      <tr><td>Buck Converters (3-pack)</td><td>$14.99</td><td><a href="https://www.amazon.com/dp/B07DLX2MWH">Buy</a></td></tr>
+      <tr><td>120mm Fans (2x)</td><td>$12.00</td><td><a href="https://www.amazon.com/dp/B002CQU564">Buy</a></td></tr>
+      <tr><td>Acrylic Sheets</td><td>$20.00</td><td><a href="https://www.amazon.com/dp/B07N13F2JL">Buy</a></td></tr>
+      <tr><td>Cups (100-pack)</td><td>$16.99</td><td><a href="https://www.amazon.com/dp/B084Z1ZSM6">Buy</a></td></tr>
+      <tr><td>Boba Flavor Kits (x3)</td><td>$66.00</td><td><a href="https://www.amazon.com/dp/B08V9BZ7NY">Buy</a></td></tr>
+      <tr><td>Milk (2x)</td><td>$9.00</td><td>Local Store</td></tr>
+      <tr><td>Thin Wood Sheets</td><td>$10.00</td><td><a href="https://www.amazon.com/dp/B01MZ8J22B">Buy</a></td></tr>
+      <tr><td>Diaphragm Pumps (4x)</td><td>$32.00</td><td><a href="https://www.amazon.com/dp/B07PFD35XJ">Buy</a></td></tr>
+      <tr><td>LED Strips (optional)</td><td>$20.00</td><td><a href="https://www.amazon.com/dp/B01CDTEJBG">Buy</a></td></tr>
+      <tr><td>Relay Modules (10-pack)</td><td>$12.00</td><td><a href="https://www.amazon.com/dp/B00LW15A4W">Buy</a></td></tr>
+      <tr><td>Tubing</td><td>$5.00</td><td><a href="https://www.amazon.com/dp/B07TKXXL47">Buy</a></td></tr>
+      <tr><td>PLA Filament (partial rolls)</td><td>$45.00</td><td><a href="https://www.amazon.com/dp/B00J0ECR5I">Buy</a></td></tr>
+      <tr class="total"><td>Total with 3D Printer</td><td colspan="2">$406.38</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>🚫 Without 3D Printer (Full Hardware Purchase)</h2>
+  <table>
+    <thead>
+      <tr><th>Additional Item</th><th>Cost</th><th>Purchase Link</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Aluminum V-Slot Rails + Connectors</td><td>$65.00</td><td><a href="https://www.amazon.com/dp/B07BQYX1JC">Buy</a></td></tr>
+      <tr><td>Stepper Motors (x3)</td><td>$42.96</td><td><a href="https://www.amazon.com/dp/B00PNEQKC0">Buy</a></td></tr>
+      <tr><td>Timing Belts + Pulleys</td><td>$17.25</td><td><a href="https://www.amazon.com/dp/B00KDVSQW4">Buy</a></td></tr>
+      <tr><td>3-Wheel Gantry Plate</td><td>$6.75</td><td><a href="https://www.amazon.com/dp/B08VGN6FG4">Buy</a></td></tr>
+      <tr><td>4-Wheel Gantry Plates (x3)</td><td>$44.67</td><td><a href="https://www.amazon.com/dp/B078MLZDXL">Buy</a></td></tr>
+      <tr><td>12V Power Supply</td><td>$8.99</td><td><a href="https://www.amazon.com/dp/B01N2JGWQ3">Buy</a></td></tr>
+      <tr class="total"><td>Total Add-On (No 3D Printer)</td><td colspan="2">$185.62</td></tr>
+      <tr class="total"><td>💰 Final Total (No 3D Printer)</td><td colspan="2">$592.00</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h3>📌 Notes & Disclaimers</h3>
+  <ul>
+    <li>Prices are accurate as of May 2025 and may vary by supplier or location.</li>
+    <li><strong>Tariffs and import taxes are not included</strong> in the totals.</li>
+    <li>Partial PLA rolls estimated at 50% value.</li>
+    <li>RFID module was excluded from final build due to time constraints.</li>
+    <li>Optional items can be removed to save money (e.g. LED strips).</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>📜 License</h3>
+  <p>This project is licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.</p>
+</div>
+
+<div class="section">
+  <h3>🙌 Credits</h3>
+  <p>Made with passion by <strong>Charles Mastromatteo, Sabrina Maule, and Vincent Lawrson</strong></p>
+</div>
+
+</body>
+</html>
