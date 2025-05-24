@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Bubba Boba – Full Updated BOM</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 40px; color: #333; }
-    h1, h2 { color: #7f27ff; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    th, td { padding: 12px; border: 1px solid #ccc; }
-    th { background-color: #f1f1f1; }
-    tr:hover { background-color: #f9f9f9; }
-    a { color: #0077cc; text-decoration: none; }
-    .total { font-weight: bold; background-color: #f6f6f6; }
-  </style>
+
 </head>
 <body>
 
 <h1>🧋 Bubba Boba – Bill of Materials (BOM)</h1>
+
+<div class="note">
+  <strong>Note:</strong> All items listed below were purchased from Amazon, <u>except milk</u> which was bought locally. The Lead Screw Kit listed is a generic kit used in multiple areas throughout the project.
+</div>
 
 <h2>✅ With 3D Printer (Reused Ender 3 Parts)</h2>
 <table>
@@ -29,7 +19,7 @@
     <tr><td>Rotary Encoder</td><td>$8.89</td><td><a href="https://www.amazon.com/HiLetgo-Degrees-Rotary-Encoder-Arduino/dp/B07WZF1TXX">Buy</a></td></tr>
     <tr><td>V-Slot Screws (25 pcs)</td><td>$2.36</td><td><a href="https://www.amazon.com/dp/B0BZP8T639">Buy</a></td></tr>
     <tr><td>Buttons (Limit Switches)</td><td>$3.00</td><td><a href="https://www.amazon.com/dp/B07X142VGC">Buy</a></td></tr>
-    <tr><td>Lead Screw Kit</td><td>$18.45</td><td>Reused</td></tr>
+    <tr><td>Lead Screw Kit (Generic)</td><td>$18.45</td><td>Reused</td></tr>
     <tr><td>Stepper Motor</td><td>$14.32</td><td><a href="https://www.amazon.com/dp/B0CX91RHF9">Buy</a></td></tr>
     <tr><td>Motor Drivers (4-pack)</td><td>$9.99</td><td><a href="https://www.amazon.com/WWZMDiB-Stepstick-Stepper-Printer-Suitable/dp/B0BFQZWT6R">Buy</a></td></tr>
     <tr><td>12V DC Motor</td><td>$14.99</td><td><a href="https://www.amazon.com/Greartisan-Electric-Reduction-Eccentric-Diameter/dp/B072KNG6NT">Buy</a></td></tr>
@@ -66,6 +56,13 @@
     <tr class="total"><td>💰 Final Total (No 3D Printer)</td><td colspan="2">$592.00</td></tr>
   </tbody>
 </table>
+
+<h3>📜 License</h3>
+<p>This project is licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a>.</p>
+
+<h3>🙌 Credits</h3>
+<p>Created by <strong>Charles Mastromatteo, Sabrina Maule, and Vincent Lawrson</strong></p>
+<p>Special thanks to the Arduino forums, Adafruit libraries, and the online maker community.</p>
 
 </body>
 </html>
