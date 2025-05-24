@@ -64,6 +64,10 @@
 
 <div class="section">
   <h2>💸 Updated Cost Breakdown</h2>
+  <p><strong>All items (except milk) were purchased from Amazon.</strong></p>
+  <p><strong>The lead screw kit used is generic and is applied throughout the project.</strong></p>
+  <p><strong>More detailed parts, source links, and specifications are included in the separate BOM file (Bill of Materials).</strong></p>
+
   <table>
     <thead>
       <tr><th>Item</th><th>Quantity</th><th>Unit Price</th><th>Total Price</th></tr>
@@ -92,7 +96,6 @@
       <tr><td>Relay Modules (10-pack)</td><td>1</td><td>$12.00</td><td>$12.00</td></tr>
       <tr><td>Tubing</td><td>1</td><td>$5.00</td><td>$5.00</td></tr>
       <tr><td><strong>Recycled Ender 3 V1 Parts (Rails, Mounts, Power Supply)</strong></td><td>–</td><td>$0.00</td><td>$0.00</td></tr>
-      <tr><td><strong>3D Printing Filament (Partial Rolls)</strong></td><td></td><td></td><td></td></tr>
       <tr><td>Black PLA (2 partial rolls)</td><td>1</td><td>$15.00</td><td>$15.00</td></tr>
       <tr><td>Gold PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
       <tr><td>Gray PLA (partial roll)</td><td>1</td><td>$7.50</td><td>$7.50</td></tr>
@@ -102,9 +105,6 @@
     </tbody>
   </table>
 
-  <p><strong>Note:</strong> This budget includes wooden casing materials; however, they were not fully implemented in the final build due to time constraints.</p>
-  <p><strong>Note:</strong> RFID module was excluded from the final system due to time constraints.</p>
-
   <h3>📝 Notes</h3>
   <ul>
     <li>Prices are based on average market values as of May 2025 and may vary depending on supplier and shipping.</li>
@@ -113,26 +113,7 @@
     <li>Optional components (e.g., LED strips) can be excluded to lower costs.</li>
     <li>Most <strong>design elements</strong> were 3D printed; their cost is factored into filament pricing.</li>
   </ul>
-
-  <h3>🔁 If Built Without 3D Printer Reuse</h3>
-  <p>Estimated pricing if sourcing all mechanical hardware independently:</p>
-  <table>
-    <thead>
-      <tr><th>Component</th><th>Qty</th><th>Est. Price</th><th>Total</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Aluminum V-Slot Rails + Connectors</td><td>1</td><td>$65.00</td><td>$65.00</td></tr>
-      <tr><td>Stepper Motors</td><td>3</td><td>$14.32</td><td>$42.96</td></tr>
-      <tr><td>Timing Belts + Pulleys</td><td>1</td><td>$17.25</td><td>$17.25</td></tr>
-      <tr><td>3-Wheel Gantry Plate</td><td>1</td><td>$6.75</td><td>$6.75</td></tr>
-      <tr><td>4-Wheel Gantry Plates</td><td>3</td><td>$14.89</td><td>$44.67</td></tr>
-      <tr><td>12V Power Supply</td><td>1</td><td>$8.99</td><td>$8.99</td></tr>
-      <tr><th colspan="3">Added Total (No Ender 3 Reuse)</th><th>$185.62</th></tr>
-    </tbody>
-  </table>
 </div>
-
-
 
 <div class="section">
   <h2>📊 Project Timeline (Gantt Chart)</h2>
@@ -142,13 +123,21 @@
 <div class="section">
   <h2>📸 Demo Gallery</h2>
   <div>
+    <h4>LCD UI</h4>
     <img src="Images/LCD UI.jpeg" alt="LCD UI">
+    <h4>Final Build</h4>
     <img src="Images/finalbuild.jpg" alt="Final Build">
+    <h4>Ground Zero (Workstation Chaos)</h4>
     <img src="Images/mess.jpeg" alt="Ground Zero">
+    <h4>LED Strip Animation</h4>
     <img src="Images/LED Animation.gif" alt="LED Strip Animation">
+    <h4>Stepper Motor Homing Sequence</h4>
     <img src="Images/Homing Sequence.gif" alt="Stepper Motor Gantry">
+    <h4>Main Board Wiring</h4>
     <img src="Images/board.jpeg" alt="Main Board">
-    <img src="Images/mega.jpeg" alt="Stepper Moters">
+    <h4>Stepper Motors on Mega</h4>
+    <img src="Images/mega.jpeg" alt="Stepper Motors">
+    <h4>Wire Management</h4>
     <img src="Images/wires.jpeg" alt="Wires">
   </div>
 </div>
