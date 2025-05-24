@@ -147,11 +147,9 @@
     <img src="Images/mess.jpeg" alt="Ground Zero">
     <img src="images/neopixels.jpg" alt="LED Strip Animation">
     <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
-    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
     <img src="Images/board.jpeg" alt="Main Board">
     <img src="Images/mega.jpeg" alt="Stepper Moters">
     <img src="Images/wires.jpeg" alt="Wires">
-    <img src="images/cleaning_mode.jpg" alt="Cleaning Mode">
   </div>
 </div>
 
