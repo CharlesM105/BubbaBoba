@@ -142,11 +142,11 @@
 <div class="section">
   <h2>📸 Demo Gallery</h2>
   <div>
-    <img src="images/lcd_menu.jpg" alt="LCD UI">
+    <img src="Images/LCD UI.jpeg" alt="LCD UI">
     <img src="Images/finalbuild.jpg" alt="Final Build">
     <img src="Images/mess.jpeg" alt="Ground Zero">
-    <img src="images/neopixels.jpg" alt="LED Strip Animation">
-    <img src="images/gantry.jpg" alt="Stepper Motor Gantry">
+    <img src="Images/LED Animation.gif" alt="LED Strip Animation">
+    <img src="Images/Homing Sequence.gif" alt="Stepper Motor Gantry">
     <img src="Images/board.jpeg" alt="Main Board">
     <img src="Images/mega.jpeg" alt="Stepper Moters">
     <img src="Images/wires.jpeg" alt="Wires">
