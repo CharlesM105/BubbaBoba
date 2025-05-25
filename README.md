@@ -162,7 +162,7 @@
 
 <div class="section">
   <h2>🙌 Credits</h2>
-  <p>Created by <strong>Charles Mastromatteo, Sabrina Maule, and Vincent Lawrson</strong></p>
+  <p>Created by <strong>Charles Mastromatteo, Sabrina Maule, and Vincent Larson</strong></p>
   <p>Special thanks to: Arduino forums, Adafruit libraries, and the online maker community.</p>
 </div>
 
