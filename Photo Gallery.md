@@ -2,37 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🖼️ Bubba Boba Photo Gallery</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
-    .photo-box {
-      border: 2px dashed #ccc;
-      padding: 10px;
-      text-align: center;
-      background-color: #f9f9f9;
-    }
-    .photo-box img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-    }
-    .caption {
-      margin-top: 8px;
-      font-weight: bold;
-    }
-  </style>
+
 </head>
 <body>
 
@@ -40,29 +10,87 @@
 
   <div class="gallery">
     <div class="photo-box">
-      <img src="Images/photo1.jpg" alt="Insert Image 1">
-      <div class="caption">Image Slot 1</div>
+      <img src="Images/Bubba Boba Logo Full.png" alt="Insert Image 1">
     </div>
     <div class="photo-box">
-      <img src="Images/photo2.jpg" alt="Insert Image 2">
-      <div class="caption">Image Slot 2</div>
+      <img src="Images/IMG_1753.jpeg" alt="Insert Image 2">
     </div>
     <div class="photo-box">
-      <img src="Images/photo3.jpg" alt="Insert Image 3">
-      <div class="caption">Image Slot 3</div>
+      <img src="Images/IMG_1776.jpeg" alt="Insert Image 3">
     </div>
     <div class="photo-box">
-      <img src="Images/photo4.jpg" alt="Insert Image 4">
-      <div class="caption">Image Slot 4</div>
+      <img src="Images/IMG_1777.jpeg" alt="Insert Image 4">
     </div>
     <div class="photo-box">
-      <img src="Images/photo5.jpg" alt="Insert Image 5">
-      <div class="caption">Image Slot 5</div>
+      <img src="Images/IMG_1778.jpeg" alt="Insert Image 5">
     </div>
     <div class="photo-box">
-      <img src="Images/photo6.jpg" alt="Insert Image 6">
-      <div class="caption">Image Slot 6</div>
+      <img src="Images/IMG_1780.jpeg" alt="Insert Image 6">
     </div>
+        <div class="photo-box">
+      <img src="Images/IMG_1782.jpeg" alt="Insert Image 6">
+    </div>
+        <div class="photo-box">
+      <img src="Images/IMG_1785.jpeg" alt="Insert Image 6">
+    </div>
+        <div class="photo-box">
+      <img src="Images/IMG_1787.jpeg" alt="Insert Image 6">
+              </div>
+            <div class="photo-box">
+      <img src="Images/IMG_1858.jpeg" alt="Insert Image 6">
+              </div>
+                <div class="photo-box">
+      <img src="Images/IMG_1883.jpeg" alt="Insert Image 6">
+              </div>
+                    <div class="photo-box">
+      <img src="Images/IMG_1886.jpeg" alt="Insert Image 6">
+              </div>
+                    <div class="photo-box">
+      <img src="Images/IMG_1891.jpeg" alt="Insert Image 6">
+              </div>
+                    <div class="photo-box">
+      <img src="Images/IMG_1898.jpeg" alt="Insert Image 6">
+              </div>
+                    <div class="photo-box">
+      <img src="Images/IMG_1907.jpeg" alt="Insert Image 6">
+              </div>
+                    <div class="photo-box">
+      <img src="Images/IMG_2002.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2011.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2014.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2057.jpeg" alt="Insert Image 6">
+                                                  <div class="photo-box">
+      <img src="Images/IMG_2361.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2369.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2373.jpeg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_2378.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2542.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2544.jpeg" alt="Insert Image 6">
+    </div>
+                            <div class="photo-box">
+      <img src="Images/IMG_2664.jpeg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_2668.jpeg" alt="Insert Image 6">
+              </div>
+      <img src="Images/finalbuild.jpg" alt="Insert Image 6">
+              </div>
   </div>
 
 </body>
