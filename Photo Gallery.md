@@ -6,7 +6,7 @@
 </head>
 <body>
 
-  <h1>📸 Bubba Boba Photo Gallery</h1>
+  <h1>📸 Bubba Boba Photo Gallery  (pictures are out of order)</h1>
 
   <div class="gallery">
     <div class="photo-box">
@@ -88,6 +88,50 @@
               </div>
                         <div class="photo-box">
       <img src="Images/IMG_2668.jpeg" alt="Insert Image 6">
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0046.PNG" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_0047.PNG" alt="Insert Image 6">
+    </div>
+                            <div class="photo-box">
+      <img src="Images/IMG_0049.PNG" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_0167.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0181.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0281.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0305.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0306.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0307.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0524.jpg" alt="Insert Image 6">
+              </div>
+                          <div class="photo-box">
+      <img src="Images/IMG_9696.jpg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/IMG_9737.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
+      <img src="Images/Autodesk Inventor Professional 2024 5_24_2025 12_09_48 PM.png" alt="Insert Image 6">
+    </div>
+                            <div class="photo-box">
+      <img src="Images/Autodesk Inventor Professional 2024 5_24_2025 12_10_36 PM.png" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
+      <img src="Images/Autodesk Inventor Professional 2024 5_24_2025 12_08_10 PM.png" alt="Insert Image 6">
               </div>
       <img src="Images/finalbuild.jpg" alt="Insert Image 6">
               </div>
