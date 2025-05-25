@@ -154,7 +154,7 @@
   </ul>
 </div>
 </div>
-      <h2>🔌 Bubba Boba Wiring Diagram</h2>
+      <h2>🔌 Wiring Diagram</h2>
   <img src="Images/Bubba Boba Wiring Diagram.png" alt="Bubba Boba Gantt Chart">
 
 <div class="section">
