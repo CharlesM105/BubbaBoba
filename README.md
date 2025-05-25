@@ -146,14 +146,16 @@
   <h2>🔌 Wiring Overview</h2>
   <p>All wiring documentation is included in <code>/docs</code>. Major components include:</p>
   <ul>
-    <li>12V power for motors and pumps</li>
-    <li>5V regulated for logic boards</li>
+    <li>10V power for motors and pumps</li>
+    <li>6V regulated for logic boards</li>
     <li>Limit switches on all axes</li>
     <li>Relay-controlled liquid pumps</li>
     <li>LED → photoresistor communication line between Mega and Uno</li>
-    <li><a href="docs/full_wiring.pdf" target="_blank">View Full Wiring Diagram (PDF)</a></li>
   </ul>
 </div>
+</div>
+      <h2>🔌 Bubba Boba Wiring Diagram</h2>
+  <img src="Images/Bubba Boba Wiring Diagram.png" alt="Bubba Boba Gantt Chart">
 
 <div class="section">
   <h2>📜 License</h2>
