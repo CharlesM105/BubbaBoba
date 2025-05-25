@@ -6,7 +6,7 @@
 </head>
 <body>
 
-  <h1>📸 Bubba Boba Photo Gallery  (pictures are out of order)</h1>
+  <h1>📸 Bubba Boba Photo Gallery</h1>
 
   <div class="gallery">
     <div class="photo-box">
