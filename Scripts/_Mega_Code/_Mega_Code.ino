@@ -21,10 +21,11 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define RELAY_FLAVOR_3 8
 #define UNO_CONNECTION A0
 #define MIXER_PIN 53
+#define BOBA_PIN A3  // BOBA dispenser
 
-const unsigned long MILK_DURATION = 5000;
+const unsigned long MILK_DURATION = 6000;
 const unsigned long FLAVOR_DURATION = 6000;
-const unsigned long MIX_DURATION = 3000;
+const unsigned long MIX_DURATION = 6000;
 
 bool inDrinkMenu = true;
 int menuIndex = 0, menuStartIndex = 0;
@@ -36,8 +37,6 @@ String controlMenu[] = { "Run Diagnostics", "Manual Axis Ctrl", "LED Settings", 
 int controlMenuSize = sizeof(controlMenu) / sizeof(controlMenu[0]);
 
 bool makingDrink = false;
-bool promptingBoba = false;
-int bobaChoice = 0;
 unsigned long drinkStartTime = 0;
 int drinkStep = 0;
 String currentDrink = "";
@@ -56,13 +55,15 @@ void setup() {
   pinMode(RELAY_MILK, OUTPUT);
   pinMode(UNO_CONNECTION, OUTPUT);
   pinMode(MIXER_PIN, OUTPUT);
+  pinMode(BOBA_PIN, OUTPUT);
 
   digitalWrite(RELAY_FLAVOR_1, HIGH);
   digitalWrite(RELAY_FLAVOR_2, HIGH);
   digitalWrite(RELAY_FLAVOR_3, HIGH);
   digitalWrite(RELAY_MILK, HIGH);
   digitalWrite(UNO_CONNECTION, LOW);
-  digitalWrite(MIXER_PIN, LOW);
+  digitalWrite(MIXER_PIN, HIGH);
+  digitalWrite(BOBA_PIN, HIGH);
 
   pinMode(ENCODER_CLK, INPUT_PULLUP);
   pinMode(ENCODER_DT, INPUT_PULLUP);
@@ -86,24 +87,22 @@ void setup() {
 void loop() {
   handleEncoder();
   handleDrinkMaking();
-  animateGoldSpin();  // New LED effect
+  animateGoldSpin();
 }
 
 void animateGoldSpin() {
   static int currentPixel = 0;
   static unsigned long lastUpdate = 0;
-  const unsigned long interval = 50; // speed of spin
-  const int trailLength = 5;         // number of LEDs lit at once
-  uint32_t goldColor = pixels.Color(255, 215, 0);  // Gold color
+  const unsigned long interval = 50;
+  const int trailLength = 5;
+  uint32_t goldColor = pixels.Color(255, 215, 0);
 
   if (millis() - lastUpdate > interval) {
     pixels.clear();
-
     for (int i = 0; i < trailLength; i++) {
       int ledIndex = (currentPixel + i) % NUMPIXELS;
       pixels.setPixelColor(ledIndex, goldColor);
     }
-
     pixels.show();
     currentPixel = (currentPixel + 1) % NUMPIXELS;
     lastUpdate = millis();
@@ -114,7 +113,7 @@ void performHoming() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Homing in progress");
-  delay(1000);
+  delay(6000);
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Homing complete");
@@ -161,13 +160,10 @@ void selectMenuItem() {
       menuIndex = 0;
     } else {
       currentDrink = selection;
-      promptingBoba = true;
-      bobaChoice = 0;
-      lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Add boba?");
-      lcd.setCursor(0, 1);
-      lcd.print("> Yes");
+      makingDrink = true;
+      messageDisplayed = false;
+      drinkStep = 0;
+      drinkStartTime = millis();
     }
   } else {
     if (selection == "Run Diagnostics") {
@@ -190,7 +186,7 @@ void selectMenuItem() {
       digitalWrite(RELAY_FLAVOR_1, LOW);
       digitalWrite(RELAY_FLAVOR_2, LOW);
       digitalWrite(RELAY_FLAVOR_3, LOW);
-      delay(30000);  // 30 seconds
+      delay(30000);
       digitalWrite(RELAY_MILK, HIGH);
       digitalWrite(RELAY_FLAVOR_1, HIGH);
       digitalWrite(RELAY_FLAVOR_2, HIGH);
@@ -213,32 +209,16 @@ void handleEncoder() {
   bool buttonState = digitalRead(ENCODER_SW);
 
   if (currentClk != lastClk && currentClk == LOW) {
-    if (promptingBoba) {
-      bobaChoice = 1 - bobaChoice;
-      lcd.setCursor(0, 1);
-      lcd.print("                ");
-      lcd.setCursor(0, 1);
-      lcd.print("> " + String(bobaChoice == 0 ? "Yes" : "No"));
-    } else {
-      int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
-      menuIndex = (currentDt != currentClk)
-                    ? (menuIndex + 1) % size
-                    : (menuIndex - 1 + size) % size;
-      showMenu();
-    }
+    int size = inDrinkMenu ? drinkMenuSize : controlMenuSize;
+    menuIndex = (currentDt != currentClk)
+                  ? (menuIndex + 1) % size
+                  : (menuIndex - 1 + size) % size;
+    showMenu();
   }
   lastClk = currentClk;
 
   if (buttonState == LOW && lastButtonState == HIGH && (millis() - lastDebounceTime > 250)) {
-    if (promptingBoba) {
-      promptingBoba = false;
-      makingDrink = true;
-      messageDisplayed = false;
-      drinkStep = 0;
-      drinkStartTime = millis();
-    } else {
-      selectMenuItem();
-    }
+    selectMenuItem();
     lastDebounceTime = millis();
   }
   lastButtonState = buttonState;
@@ -290,6 +270,7 @@ void handleDrinkMaking() {
         lcd.setCursor(0, 0);
         lcd.print("Dispensing milk...");
         digitalWrite(RELAY_MILK, LOW);
+        delay(6000);
         messageDisplayed = true;
         drinkStartTime = now;
       }
@@ -302,12 +283,14 @@ void handleDrinkMaking() {
 
     case 3:
       if (!messageDisplayed) {
+        delay(1000);
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Adding flavor...");
         if (currentDrink == "Classic Tea") digitalWrite(RELAY_FLAVOR_1, LOW);
         else if (currentDrink == "Strawberry Milk") digitalWrite(RELAY_FLAVOR_2, LOW);
         else if (currentDrink == "Taro Milk Tea") digitalWrite(RELAY_FLAVOR_3, LOW);
+           delay(6000);
         messageDisplayed = true;
         drinkStartTime = now;
       }
@@ -317,6 +300,7 @@ void handleDrinkMaking() {
         digitalWrite(RELAY_FLAVOR_3, HIGH);
         drinkStep++;
         messageDisplayed = false;
+        delay(3000);
       }
       break;
 
@@ -324,13 +308,16 @@ void handleDrinkMaking() {
       if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
-        lcd.print("Mixing...");
-        digitalWrite(MIXER_PIN, HIGH);
+        lcd.print("Shakin...");
         messageDisplayed = true;
-        drinkStartTime = now;
+        drinkStartTime = now;  // Start 54-second wait
       }
-      if (now - drinkStartTime >= MIX_DURATION) {
-        digitalWrite(MIXER_PIN, LOW);
+      if (now - drinkStartTime >= 54000 && now - drinkStartTime < 54000 + MIX_DURATION) {
+        lcd.setCursor(0, 1);
+        lcd.print("Mixing...");
+        digitalWrite(MIXER_PIN, LOW);  // Start mixing
+      } else if (now - drinkStartTime >= 54000 + MIX_DURATION) {
+        digitalWrite(MIXER_PIN, HIGH);  // Stop mixing
         drinkStep++;
         messageDisplayed = false;
       }
@@ -338,9 +325,40 @@ void handleDrinkMaking() {
 
     case 5:
       if (!messageDisplayed) {
+        delay(10000);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Dispensing boba...");
+        digitalWrite(BOBA_PIN, LOW);
+        messageDisplayed = true;
+        drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= 5000) {
+        digitalWrite(BOBA_PIN, HIGH);
+        drinkStep++;
+        messageDisplayed = false;
+      }
+      break;
+
+    case 6:
+      if (!messageDisplayed) {
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Enjoy your drink!");
+        messageDisplayed = true;
+        drinkStartTime = now;
+      }
+      if (now - drinkStartTime >= 2000) {
+        drinkStep++;
+        messageDisplayed = false;
+      }
+      break;
+
+    case 7:
+      if (!messageDisplayed) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Done!");
         messageDisplayed = true;
         drinkStartTime = now;
       }
