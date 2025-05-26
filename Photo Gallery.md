@@ -124,6 +124,9 @@
                         <div class="photo-box">
       <img src="Images/IMG_9737.jpg" alt="Insert Image 6">
               </div>
+                        <div class="photo-box">
+      <img src="Images/3D design Auto Boba Milk Tea Machine - Tinkercad - Opera 5_25_2025 10_18_42 PM.png" alt="Insert Image 6">
+              </div>
                                                   <div class="photo-box">
       <img src="Images/Autodesk Inventor Professional 2024 5_24_2025 12_09_48 PM.png" alt="Insert Image 6">
     </div>
@@ -132,6 +135,10 @@
               </div>
                         <div class="photo-box">
       <img src="Images/Autodesk Inventor Professional 2024 5_24_2025 12_08_10 PM.png" alt="Insert Image 6">
+                                                  <div class="photo-box">
+      <img src="Images/IMG_0566.jpg" alt="Insert Image 6">
+              </div>
+                        <div class="photo-box">
               </div>
       <img src="Images/finalbuild.jpg" alt="Insert Image 6">
               </div>
