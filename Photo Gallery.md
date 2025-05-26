@@ -89,6 +89,9 @@
                         <div class="photo-box">
       <img src="Images/IMG_2668.jpeg" alt="Insert Image 6">
                                                   <div class="photo-box">
+      <img src="Images/IMG_0580.jpg" alt="Insert Image 6">
+              </div>
+                                                  <div class="photo-box">
       <img src="Images/IMG_0046.PNG" alt="Insert Image 6">
               </div>
                         <div class="photo-box">
