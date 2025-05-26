@@ -21,7 +21,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 #define RELAY_FLAVOR_3 8
 #define UNO_CONNECTION A0
 #define MIXER_PIN 53
-#define BOBA_PIN A3  // BOBA dispenser
+#define BOBA_PIN A3
 
 const unsigned long MILK_DURATION = 6000;
 const unsigned long FLAVOR_DURATION = 6000;
@@ -45,6 +45,7 @@ bool messageDisplayed = false;
 int lastClk = HIGH;
 bool lastButtonState = HIGH;
 unsigned long lastDebounceTime = 0;
+bool animateLED = true;
 
 void setup() {
   Serial.begin(9600);
@@ -87,7 +88,7 @@ void setup() {
 void loop() {
   handleEncoder();
   handleDrinkMaking();
-  animateGoldSpin();
+  if (animateLED) animateGoldSpin();
 }
 
 void animateGoldSpin() {
@@ -164,19 +165,19 @@ void selectMenuItem() {
       messageDisplayed = false;
       drinkStep = 0;
       drinkStartTime = millis();
+
+      animateLED = false;
+      setFlavorColor(currentDrink);
     }
   } else {
     if (selection == "Run Diagnostics") {
-      lcd.clear();
-      lcd.print("Running tests...");
+      lcd.clear(); lcd.print("Running tests...");
       delay(1000);
     } else if (selection == "Manual Axis Ctrl") {
-      lcd.clear();
-      lcd.print("Manual Ctrl TBD");
+      lcd.clear(); lcd.print("Manual Ctrl TBD");
       delay(1000);
     } else if (selection == "LED Settings") {
-      lcd.clear();
-      lcd.print("LED Settings TBD");
+      lcd.clear(); lcd.print("LED Settings TBD");
       delay(1000);
     } else if (selection == "Cleaning") {
       lcd.clear();
@@ -290,7 +291,7 @@ void handleDrinkMaking() {
         if (currentDrink == "Classic Tea") digitalWrite(RELAY_FLAVOR_1, LOW);
         else if (currentDrink == "Strawberry Milk") digitalWrite(RELAY_FLAVOR_2, LOW);
         else if (currentDrink == "Taro Milk Tea") digitalWrite(RELAY_FLAVOR_3, LOW);
-           delay(6000);
+        delay(6000);
         messageDisplayed = true;
         drinkStartTime = now;
       }
@@ -310,14 +311,15 @@ void handleDrinkMaking() {
         lcd.setCursor(0, 0);
         lcd.print("Shakin...");
         messageDisplayed = true;
-        drinkStartTime = now;  // Start 54-second wait
+        drinkStartTime = now;
       }
-      if (now - drinkStartTime >= 54000 && now - drinkStartTime < 54000 + MIX_DURATION) {
-        lcd.setCursor(0, 1);
+      if (now - drinkStartTime >= 50000 && now - drinkStartTime < 50000 + MIX_DURATION) {
+        lcd.clear();
+        lcd.setCursor(0, 0);
         lcd.print("Mixing...");
-        digitalWrite(MIXER_PIN, LOW);  // Start mixing
-      } else if (now - drinkStartTime >= 54000 + MIX_DURATION) {
-        digitalWrite(MIXER_PIN, HIGH);  // Stop mixing
+        digitalWrite(MIXER_PIN, LOW);
+      } else if (now - drinkStartTime >= 50000 + MIX_DURATION) {
+        digitalWrite(MIXER_PIN, HIGH);
         drinkStep++;
         messageDisplayed = false;
       }
@@ -361,11 +363,33 @@ void handleDrinkMaking() {
         lcd.print("Done!");
         messageDisplayed = true;
         drinkStartTime = now;
+
+        // Turn off leds
+        for (int i = 0; i < NUMPIXELS; i++) {
+          pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+        }
+        pixels.show();
       }
-      if (now - drinkStartTime >= 2000) {
+      if (now - drinkStartTime >= 6000) {
         makingDrink = false;
+        animateLED = true;
+        pixels.clear();
+        pixels.show();
         showMenu();
       }
       break;
   }
+}
+
+void setFlavorColor(String drink) {
+  uint32_t color;
+  if (drink == "Classic Tea") color = pixels.Color(188, 158, 130); // Brown
+  else if (drink == "Strawberry Milk") color = pixels.Color(160, 32, 240); // Pink
+  else if (drink == "Taro Milk Tea") color = pixels.Color(48, 25, 52); // Purple
+  else color = pixels.Color(255, 255, 255); // Default white
+
+  for (int i = 0; i < NUMPIXELS; i++) {
+    pixels.setPixelColor(i, color);
+  }
+  pixels.show();
 }
