@@ -123,10 +123,10 @@
 <div class="section">
   <h2>📸 Demo Gallery</h2>
   <div>
+    <h4>Final Build</h4>
+    <img src="Images/finalbuild.jpeg" alt="Final Build">
     <h4>LCD UI</h4>
     <img src="Images/LCD UI.jpeg" alt="LCD UI">
-    <h4>Final Build</h4>
-    <img src="Images/finalbuild.jpg" alt="Final Build">
     <h4>Ground Zero (Workstation Chaos)</h4>
     <img src="Images/mess.jpeg" alt="Ground Zero">
     <h4>LED Strip Animation</h4>
