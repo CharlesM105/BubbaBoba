@@ -271,7 +271,7 @@ void handleDrinkMaking() {
         lcd.setCursor(0, 0);
         lcd.print("Dispensing milk...");
         digitalWrite(RELAY_MILK, LOW);
-        delay(6000);
+        delay(12000);
         messageDisplayed = true;
         drinkStartTime = now;
       }
