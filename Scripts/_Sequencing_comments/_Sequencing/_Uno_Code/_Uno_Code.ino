@@ -118,7 +118,7 @@ void runFullSequence() {
  stepperZ.runToPosition();
  Serial.println("Z lowered");
 
- delay(15000);  // Dispensing flavor
+ delay(21000);  // Dispensing flavor
 
    // X oscilation
     stepperX.setMaxSpeed(5000); 
@@ -666,7 +666,7 @@ delay(5000);
  }
 
  // X moves to mixer
- stepperX.moveTo(-670);
+ stepperX.moveTo(-695);
  stepperX.runToPosition();
  Serial.println("X moved to mixer");
 
